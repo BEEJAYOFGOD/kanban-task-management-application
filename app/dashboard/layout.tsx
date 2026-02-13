@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Sidebar from "@/components/SIdebar";
+import AppSidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -24,16 +25,19 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-                <div>
-                    <Header />
-                    <Sidebar />
-                    {children}
+
+        <SidebarProvider>
+            <div className="w-full h-full">
+                <Header />
+                <div className="flex">
+                    <AppSidebar />
+                    <main className="w-full min-h-ful bg-dashboard-bg">
+                        {children}
+                    </main>
                 </div>
-            </body>
-        </html>
+
+            </div>
+        </SidebarProvider>
+
     );
 }
