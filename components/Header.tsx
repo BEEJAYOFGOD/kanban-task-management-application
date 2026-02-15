@@ -11,7 +11,7 @@ export default function Header() {
 
     return (
         <nav className="flex justify-between w-full h-16 bg-sidebar">
-            <div className={`flex p-4 gap-4 w-50 border-r-sidebar-border/20 border-r ${state === "collapsed" ? "border-r-sidebar-border border-b" : "border-b-0"}`}>
+            <div className={`flex p-4 gap-4 w-60 pl-6 border-r-sidebar-border/20 border-r ${state === "collapsed" ? "border-r-sidebar-border border-b" : "border-b-0"}`}>
                 <Image height="20" width="20" className="w-6" src={logo} alt="kanban logo" />
                 <p>Kanban</p>
             </div>

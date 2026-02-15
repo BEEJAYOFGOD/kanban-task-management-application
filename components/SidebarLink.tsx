@@ -15,7 +15,7 @@ export default function SidebarLink({ link }: { link: NavLink }) {
             <SidebarMenuButton
                 asChild
                 className={cn(
-                    "fill-primary group/link rounded-l-none rounded-r-full m-0",
+                    "fill-primary group/link rounded-l-none rounded-r-full m-0 pl-6 text-sm font-medium ",
 
                     isActive
                         ? "bg-primary hover:bg-primary/80 text-white"

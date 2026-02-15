@@ -87,7 +87,7 @@
   --color-foreground: var(--foreground);
   --color-line: var(--line);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-Jakarta-sans);
   --font-mono: var(--font-geist-mono);
   --color-dashboard-bg: var(--dashboard-bg);
   --color-medium-gray: var(--medium-gray);
