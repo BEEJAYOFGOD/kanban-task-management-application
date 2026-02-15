@@ -17,21 +17,12 @@ type ThemeContext = {
 
 const ThemeContext = createContext<ThemeContext | null>(null);
 
-const getStoredTheme = (): Theme => {
-    if (typeof window !== "undefined") {
-        return (localStorage.getItem("theme") as Theme) ?? "dark";
-    }
-    return "dark"; // default for SSR
-};
-
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-
-    const [theme, setTheme] = useState<Theme>(getStoredTheme);
+    const [theme, setTheme] = useState<Theme>("dark");
 
     useEffect(() => {
-
-        localStorage.setItem("theme", theme);
-
+        // this code runs to check if the user has a saved theme in localStorage
+        // it also checks to know what the user selected in the system settings
         document.documentElement.classList.toggle(
             "dark",
             localStorage.theme === "dark" ||
@@ -39,18 +30,36 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
                 window.matchMedia("(prefers-color-scheme: dark)").matches)
         );
 
+        const storedTheme = localStorage.getItem("theme") as Theme | "light";
+
+        if (storedTheme) {
+            setTheme(storedTheme);
+        }
+    }, []);
+
+
+    useEffect(() => {
+        localStorage.setItem("theme", theme);
+        document.documentElement.classList.toggle("dark", theme === "dark");
     }, [theme]);
 
+    // Listen for system theme changes
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+        const handleChange = (e: MediaQueryListEvent) => {
+            const newTheme = e.matches ? "dark" : "light";
+            setTheme(newTheme);
+            localStorage.setItem("theme", newTheme);
+        };
+
+        mediaQuery.addEventListener("change", handleChange);
+
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, []);
 
     const toggleTheme = () => {
-        console.log(theme);
-
-        setTheme((prev: Theme) => {
-            const newTheme = prev === "light" ? "dark" : "light";
-
-            localStorage.setItem("theme", newTheme);
-            return newTheme;
-        });
+        setTheme((prev: Theme) => (prev === "light" ? "dark" : "light"));
     };
 
     return (
@@ -60,10 +69,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
     const context = useContext(ThemeContext);
-
     if (!context) {
         throw new Error("useTheme must be used within ThemeProvider");
     }

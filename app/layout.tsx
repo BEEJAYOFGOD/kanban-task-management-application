@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ConvexClientProvider } from "./convexdb/ConvexProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <TooltipProvider>
-            {children}
+            <ConvexClientProvider>{children}</ConvexClientProvider>
           </TooltipProvider>
         </ThemeProvider>
       </body>
