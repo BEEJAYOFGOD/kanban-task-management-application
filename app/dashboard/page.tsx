@@ -1,6 +1,7 @@
 import DashboardEmpty from "@/components/DashboardEmpty"
 import { api } from "@/convex/_generated/api";
 import { preloadQuery } from "convex/nextjs";
+
 import { redirect } from "next/navigation";
 import { fetchQuery } from "convex/nextjs";
 

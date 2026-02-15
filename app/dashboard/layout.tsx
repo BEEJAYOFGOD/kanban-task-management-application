@@ -30,11 +30,13 @@ export default async function DashboardLayout({
 
     return (
         <SidebarProvider>
-            <div className="w-full h-full">
+            <div className="w-full min-h-screen">
                 <Header />
-                <div className="flex">
+
+                <div className="flex h-[calc(100vh-4rem)]">
                     <AppSidebar preloadedBoards={preloaded} />
-                    <main className="w-full duration-300 ease-in-out transition-all min-h-ful bg-dashboard-bg">
+
+                    <main className="w-full p-4 duration-300 ease-in-out transition-all  overflow-auto bg-dashboard-bg">
                         {children}
                     </main>
                 </div>
