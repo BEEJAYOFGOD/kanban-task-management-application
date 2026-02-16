@@ -1,15 +1,33 @@
+'use client'
 import { Task } from "@/types/Boards";
 import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import AddNewColumnBtn from "./AddNewColumnBtn";
+import { useState } from "react";
+import ViewTaskDialog from "./ViewTaskDialog";
 
 export default function Subtask({ task }: { task: Task }) {
     const noOfCompleted = task.subtasks.filter((subtask) => subtask.isCompleted).length;
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isViewd, setisViewd] = useState({} as Task);
+
+    const viewTask = () => {
+        setIsDialogOpen(true);
+        setisViewd(task);
+    }
+
 
     return (
-        <Card className="p-4 px-3 rounded-sm">
-            <CardHeader className="p-0 space-y-0">
-                <CardTitle>{task.title}</CardTitle>
-                <CardDescription>{noOfCompleted} of {task.subtasks.length} subtasks</CardDescription>
-            </CardHeader>
-        </Card>
+        <>
+            <Card onClick={viewTask} className="p-4 px-3 rounded-sm">
+                <CardHeader className="p-0 space-y-0">
+                    <CardTitle>{task.title}</CardTitle>
+                    <CardDescription>{noOfCompleted} of {task.subtasks.length} subtasks</CardDescription>
+                </CardHeader>
+            </Card>
+
+            {/* <AddNewColumnBtn onOpenChange={setIsDialogOpen} open={isDialogOpen} /> */}
+
+            <ViewTaskDialog task={isViewd} onOpenChange={setIsDialogOpen} open={isDialogOpen} />
+        </>
     )
 }

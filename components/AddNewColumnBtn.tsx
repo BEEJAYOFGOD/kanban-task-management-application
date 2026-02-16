@@ -13,17 +13,23 @@ import { Label } from "@/components/ui/label";
 import closeBtn from "@/public/icons/closeBtn.png"
 import Image from "next/image";
 
-interface AddNewColumnBtnProps {
+interface AddNewColumnDialogProps {
     mode?: "edit" | 'add';
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export default function AddNewColumnBtn({ mode = "edit" }: AddNewColumnBtnProps) {
+export default function AddNewColumnDialog({
+    mode = "edit",
+    open = false,
+    onOpenChange,
+}: AddNewColumnDialogProps) {
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <form>
                 <DialogTrigger asChild>
-                    <Button>Add New Column</Button>
+                    {mode == "add" && <Button>Add New Column</Button>}
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-sm" showCloseButton={false}>
                     <DialogHeader >

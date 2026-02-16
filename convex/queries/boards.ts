@@ -9,8 +9,6 @@ export const getAll = query({
 });
 
 
-
-
 export const getBoardById = query({
     args: {
         id: v.id("boards"),

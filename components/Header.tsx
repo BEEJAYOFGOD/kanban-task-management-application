@@ -1,12 +1,14 @@
 'use client'
 import Image from "next/image";
 import logo from "@/public/icons/logo.png"
-import options from "@/public/icons/headeroptions.png"
 import { useSidebar } from "./ui/sidebar";
 import AddTaskBtn from "./AddTaskBtn";
+import { useCurrentBoard } from "@/hooks/use-board";
 
 export default function Header() {
     const { state } = useSidebar();
+    const { boardName } = useCurrentBoard();
+
 
 
     return (
@@ -16,7 +18,7 @@ export default function Header() {
                 <p>Kanban</p>
             </div>
             <div className="flex p-4 flex-1 justify-between border-b-sidebar-border/20 border-b">
-                <h1>Board Name</h1>
+                <h1>{boardName}</h1>
 
                 <AddTaskBtn />
 
