@@ -1,7 +1,6 @@
 // convex/seed.ts
 // Run this once to seed your database with the transformed data
 // Usage: Add this as a mutation and call it from the Convex dashboard
-
 import { mutation } from "./_generated/server";
 
 const data = {
@@ -314,6 +313,7 @@ export const seedDatabase = mutation({
     handler: async (ctx) => {
         // Clear existing data first
         const existingBoards = await ctx.db.query("boards").collect();
+
         for (const board of existingBoards) {
             // Delete subtasks
             const columns = await ctx.db

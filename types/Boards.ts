@@ -4,7 +4,7 @@ export interface Board {
     _id: Id<"boards">;
     _creationTime: number;
     name: string;
-    columns: Column[];
+    columns?: Column[];
 }
 
 export interface Column {

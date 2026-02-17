@@ -21,6 +21,7 @@ import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from ".
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useBoardContext } from "@/contexts/BoardContext";
+import { Column } from "@/types/Boards";
 
 export default function AddNewTaskDialog() {
     const { statuses, boardId, currentBoard } = useBoardContext();
@@ -52,7 +53,7 @@ export default function AddNewTaskDialog() {
         if (!boardId || !currentBoard) return;
 
         // Find the column ID for the selected status
-        const selectedColumn = currentBoard.columns?.find((c: any) => c.name === (status || statuses[0]));
+        const selectedColumn = currentBoard.columns?.find((c: Column) => c.name === (status || statuses[0]));
         if (!selectedColumn) return;
 
         await createTask({

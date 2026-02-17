@@ -19,6 +19,7 @@ export default async function DashboardLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+
     const preloaded = await preloadQuery(api.queries.boards.getAll);
 
     return (

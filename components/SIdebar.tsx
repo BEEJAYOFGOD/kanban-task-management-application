@@ -44,8 +44,6 @@ export default function AppSidebar() {
             name: board.name,
         })) ?? []
 
-
-
     console.log(pathname);
 
 

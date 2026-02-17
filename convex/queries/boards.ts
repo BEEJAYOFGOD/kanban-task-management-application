@@ -23,9 +23,11 @@ export const getBoardById = query({
 // This is the one query you need to render a full board!
 export const getFullBoard = query({
     args: { boardId: v.id("boards") },
+
     handler: async (ctx, args) => {
         // 1. Get the board
         const board = await ctx.db.get(args.boardId);
+
         if (!board) return null;
 
         // 2. Get all columns for this board (ordered)
@@ -39,6 +41,7 @@ export const getFullBoard = query({
 
         // 3. For each column, get its tasks and subtasks
         const columnsWithTasks = await Promise.all(
+
             columns.map(async (column) => {
                 // Get tasks for this column (ordered)
                 const tasks = await ctx.db
@@ -70,9 +73,6 @@ export const getFullBoard = query({
     },
 });
 
-// ─────────────────────────────────────────
-// SUBTASK MUTATIONS
-// ─────────────────────────────────────────
 
 // Toggle subtask isCompleted - super simple now!
 export const toggleSubtask = mutation({
@@ -80,6 +80,7 @@ export const toggleSubtask = mutation({
         subtaskId: v.id("subtasks"),
         isCompleted: v.boolean(),
     },
+
     handler: async (ctx, args) => {
         await ctx.db.patch(args.subtaskId, {
             isCompleted: args.isCompleted,
@@ -87,9 +88,7 @@ export const toggleSubtask = mutation({
     },
 });
 
-// ─────────────────────────────────────────
-// TASK MUTATIONS
-// ─────────────────────────────────────────
+
 // Move task between columns (for drag and drop)
 export const moveTask = mutation({
     args: {
@@ -118,6 +117,7 @@ export const createTask = mutation({
         boardId: v.id("boards"),
         subtasks: v.array(v.object({ title: v.string() })),
     },
+
     handler: async (ctx, args) => {
         // Get current task count for ordering
         const existingTasks = await ctx.db
@@ -136,6 +136,7 @@ export const createTask = mutation({
 
         // Insert subtasks
         for (const subtask of args.subtasks) {
+
             await ctx.db.insert("subtasks", {
                 title: subtask.title,
                 isCompleted: false,
@@ -156,8 +157,10 @@ export const updateTask = mutation({
         status: v.optional(v.string()),
         columnId: v.optional(v.id("columns")),
     },
+
     handler: async (ctx, args) => {
         const { taskId, ...updates } = args;
+
         await ctx.db.patch(taskId, updates);
     },
 });
@@ -180,9 +183,6 @@ export const deleteTask = mutation({
     },
 });
 
-// ─────────────────────────────────────────
-// COLUMN MUTATIONS
-// ─────────────────────────────────────────
 
 // Add a new column to a board
 export const addColumn = mutation({
@@ -190,6 +190,7 @@ export const addColumn = mutation({
         boardId: v.id("boards"),
         name: v.string(),
     },
+
     handler: async (ctx, args) => {
         const existingColumns = await ctx.db
             .query("columns")
