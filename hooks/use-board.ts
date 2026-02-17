@@ -8,7 +8,7 @@ export function useCurrentBoard() {
     const boardId = params.id as Id<"boards">;
 
     const boards = useQuery(api.queries.boards.getAll);
-    const board = useQuery(api.queries.boards.getBoardById, { id: boardId });
+    const board = useQuery(api.queries.boards.getFullBoard, boardId ? { boardId } : "skip");
 
     const preloadedBoard = boards?.find((b) => b._id === boardId);
 
@@ -16,7 +16,7 @@ export function useCurrentBoard() {
         board,
         boardId,
         boardName: board?.name || preloadedBoard?.name,
-        statuses: board?.columns.map((c) => c.name) ?? [],
+        statuses: board?.columns?.map((c: any) => c.name) ?? [],
         isLoading: !board && !preloadedBoard,
     };
 }

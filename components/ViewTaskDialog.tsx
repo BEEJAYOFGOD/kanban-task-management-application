@@ -13,10 +13,9 @@ import { api } from "@/convex/_generated/api";
 import { useBoardContext } from "@/contexts/BoardContext";
 import Image from "next/image";
 import checkIcon from "@/public/icons/check.png"
-import { Task } from "@/types/Boards";
+import { Column, Subtask, Task } from "@/types/Boards";
 import { Id } from "@/convex/_generated/dataModel";
-import { Select } from "radix-ui";
-import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 
 interface AddNewColumnDialogProps {
     mode?: "edit" | 'add';
@@ -32,13 +31,39 @@ export default function ViewTaskDialog({
     onOpenChange,
 }: AddNewColumnDialogProps) {
 
-    const { statuses } = useBoardContext();
+    const { statuses, boardId } = useBoardContext();
 
+    const noCompleted = task.subtasks?.filter(st => st.isCompleted).length || 0;
 
-    const noCompleted = task.subtasks?.filter(subtask => !subtask.isCompleted).length;
+    const toggleSubtask = useMutation(api.queries.boards.toggleSubtask).withOptimisticUpdate(
+        (localStore, { subtaskId, isCompleted }) => {
+            if (!boardId) return;
 
-    const toggleTaskStatus = (_id: Id<"subtasks">, isCompleted: boolean) => {
+            const board = localStore.getQuery(api.queries.boards.getFullBoard, { boardId });
 
+            if (board) {
+                localStore.setQuery(api.queries.boards.getFullBoard, { boardId }, {
+                    ...board,
+
+                    columns: board.columns.map((col: Column) => ({
+                        ...col,
+                        tasks: col.tasks.map((t: Task) => ({
+                            ...t,
+                            subtasks: t.subtasks.map((st: Subtask) =>
+                                st._id === subtaskId ? { ...st, isCompleted } : st
+                            )
+                        }))
+                    }))
+                });
+            }
+        }
+    );
+
+    const toggleTaskStatus = async (subtaskId: Id<"subtasks">, isCompleted: boolean) => {
+        await toggleSubtask({
+            subtaskId,
+            isCompleted: !isCompleted
+        });
     }
 
     return (
@@ -81,6 +106,7 @@ export default function ViewTaskDialog({
                             ))}
                         </ul>
                     </section>
+
                     <DialogFooter>
                         <div className="flex flex-col items-start w-full">
                             <p>Current Status</p>
