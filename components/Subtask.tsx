@@ -6,7 +6,7 @@ import { useState } from "react";
 import ViewTaskDialog from "./ViewTaskDialog";
 
 export default function Subtask({ task }: { task: Task }) {
-    const noOfCompleted = task.subtasks.filter((subtask) => subtask.isCompleted).length;
+    const noOfCompleted = task.subtasks?.filter((subtask) => subtask.isCompleted).length ?? 0;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isViewd, setisViewd] = useState({} as Task);
 
@@ -25,7 +25,6 @@ export default function Subtask({ task }: { task: Task }) {
                 </CardHeader>
             </Card>
 
-            {/* <AddNewColumnBtn onOpenChange={setIsDialogOpen} open={isDialogOpen} /> */}
 
             <ViewTaskDialog task={isViewd} onOpenChange={setIsDialogOpen} open={isDialogOpen} />
         </>

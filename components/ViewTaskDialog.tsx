@@ -8,11 +8,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Task } from "@/types/Boards";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { useCurrentBoard } from "@/hooks/use-board";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useBoardContext } from "@/contexts/BoardContext";
 import Image from "next/image";
 import checkIcon from "@/public/icons/check.png"
+import { Task } from "@/types/Boards";
+import { Id } from "@/convex/_generated/dataModel";
+import { Select } from "radix-ui";
+import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 
 interface AddNewColumnDialogProps {
     mode?: "edit" | 'add';
@@ -28,11 +32,14 @@ export default function ViewTaskDialog({
     onOpenChange,
 }: AddNewColumnDialogProps) {
 
-    const { statuses } = useCurrentBoard();
+    const { statuses } = useBoardContext();
 
 
     const noCompleted = task.subtasks?.filter(subtask => !subtask.isCompleted).length;
 
+    const toggleTaskStatus = (_id: Id<"subtasks">, isCompleted: boolean) => {
+
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,15 +64,19 @@ export default function ViewTaskDialog({
                         <p>Subtasks ({task?.subtasks?.length > 0 ? noCompleted + " of " + task?.subtasks?.length : 0})</p>
 
                         <ul className="space-y-2">
-                            {task.subtasks?.map((subtask, index) => (
-                                <div className="bg-dashboard-bg gap-2 items-center flex p-2 rounded-md">
-                                    <div className={`${subtask.isCompleted ? "bg-primary" : "border-medium-gray/80 border bg-medium-gray/20"} w-6 h-6 flex items-center justify-center rounded-sm`}>
+                            {task.subtasks?.map((subtask) => (
+                                <div
+                                    key={subtask._id}
+                                    onClick={() => toggleTaskStatus(subtask._id, subtask.isCompleted)}
+                                    className="bg-dashboard-bg gap-2 items-center flex p-2 rounded-md cursor-pointer hover:bg-medium-gray/10"
+                                >
+                                    <div className={`${subtask.isCompleted ? "bg-primary " : "border-medium-gray/80 border bg-medium-gray/20"} w-6 h-6 flex items-center justify-center rounded-sm`}>
                                         {subtask.isCompleted && (
                                             <Image width="4" height="4" src={checkIcon} alt="checkbox" className="w-4" />
                                         )}
 
                                     </div>
-                                    <li className="text-xs" key={index}>{subtask.title}</li>
+                                    <li className={`${subtask.isCompleted ? "line-through text-medium-gray" : ""} text-xs`}>{subtask.title}</li>
                                 </div>
                             ))}
                         </ul>

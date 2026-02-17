@@ -1,25 +1,30 @@
+import { Id } from "@/convex/_generated/dataModel";
 
 export interface Board {
-    _id: string;
+    _id: Id<"boards">;
     _creationTime: number;
     name: string;
-    status: string;
     columns: Column[];
 }
 
 export interface Column {
+    _id: Id<"columns">;
     name: string;
     tasks: Task[];
+    order: number;
 }
 
 export interface Task {
+    _id: Id<"tasks">;
     title: string;
     description: string;
     status: string;
     subtasks: Subtask[];
+    order: number;
 }
 
-interface Subtask {
+export interface Subtask {
+    _id: Id<"subtasks">;
     title: string;
     isCompleted: boolean;
 }

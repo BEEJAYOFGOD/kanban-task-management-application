@@ -9,6 +9,7 @@
  */
 
 import type * as queries_boards from "../queries/boards.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "queries/boards": typeof queries_boards;
+  seed: typeof seed;
 }>;
 
 /**

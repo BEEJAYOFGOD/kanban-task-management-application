@@ -1,7 +1,6 @@
 'use client'
-
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useQuery, Preloaded, usePreloadedQuery } from "convex/react";
+import { createContext, useContext, ReactNode } from 'react';
+import { Preloaded, usePreloadedQuery, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import { Id } from "@/convex/_generated/dataModel";
@@ -28,21 +27,19 @@ export function BoardProvider({
     const boards = usePreloadedQuery(preloadedBoards);
     const params = useParams();
     const boardId = params.id as Id<"boards">;
-
-    const currentBoard = useQuery(api.queries.boards.getBoardById,
-        boardId ? { id: boardId } : "skip"
+    const fullBoard = useQuery(api.queries.boards.getFullBoard,
+        boardId ? { boardId } : "skip"
     );
 
     const activeBoardFromList = boards?.find((b) => b._id === boardId);
-    const activeBoard = currentBoard || activeBoardFromList;
 
     const value: BoardContextType = {
         boards,
-        currentBoard: activeBoard,
+        currentBoard: fullBoard,
         boardId,
-        boardName: activeBoard?.name,
-        statuses: activeBoard?.columns.map((column: Column) => column.name) ?? [],
-        isLoading: !activeBoard,
+        boardName: fullBoard?.name || activeBoardFromList?.name,
+        statuses: fullBoard?.columns?.map((column: any) => column.name) ?? [],
+        isLoading: !fullBoard && !!boardId,
     };
 
     return (

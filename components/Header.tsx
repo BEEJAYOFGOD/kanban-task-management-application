@@ -7,7 +7,7 @@ import AddTaskBtn from "./AddTaskBtn";
 
 export default function Header() {
     const { state } = useSidebar();
-    const { boardName, statuses } = useBoardContext();
+    const { boardName } = useBoardContext();
 
     return (
         <nav className="flex justify-between w-full h-16 bg-sidebar">
