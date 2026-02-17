@@ -19,35 +19,30 @@ import Moon from "@/public/icons/moon.svg";
 import Image from "next/image";
 import Sun from "@/public/icons/sun.svg";
 import { useTheme } from "@/contexts/ThemeContext"
-import Link from "next/link"
-import { Preloaded, usePreloadedQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SidebarLink from "./SidebarLink";
+import { useBoardContext } from "@/contexts/BoardContext"
 
 
-
-type Props = {
-    preloadedBoards: Preloaded<typeof api.queries.boards.getAll>;
-};
 
 export interface NavLink {
     href: string,
     name: string
 }
 
-export default function AppSidebar({ preloadedBoards }: Props) {
+export default function AppSidebar() {
 
     const { state, toggleSidebar } = useSidebar();
     const { toggleTheme, theme } = useTheme();
-    const boards = usePreloadedQuery(preloadedBoards);
+    const { boards } = useBoardContext();
     const pathname = usePathname();
 
     const Links: NavLink[] =
-        boards.map((board) => ({
+        boards?.map((board) => ({
             href: `/dashboard/${board._id}`,
             name: board.name,
-        }))
+        })) ?? []
 
 
 

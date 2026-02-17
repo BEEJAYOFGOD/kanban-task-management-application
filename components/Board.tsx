@@ -1,21 +1,18 @@
 'use client'
-import { api } from "@/convex/_generated/api";
-import { Preloaded, usePreloadedQuery } from "convex/react";
+
 import Column from "./Column";
-
-type BoardProps = {
-    preloadedBoard: Preloaded<typeof api.queries.boards.getBoardById>;
-};
+import { useBoardContext } from "@/contexts/BoardContext";
 
 
-export default function Board({ preloadedBoard }: BoardProps) {
-    const board = usePreloadedQuery(preloadedBoard);
+export default function Board() {
+    const { currentBoard } = useBoardContext();
 
     return (
         <div className={`flex w-full  gap-4`}>
-            {board?.columns.map((column, idx) => (
+            {currentBoard?.columns.map((column: any, idx: number) => (
                 <Column key={idx} column={column} />
             ))}
         </div>
     )
 }
+

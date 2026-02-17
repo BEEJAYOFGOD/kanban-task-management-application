@@ -2,10 +2,11 @@
 import Option from "@/public/icons/headeroptions.png";
 import Image from "next/image";
 import AddNewTaskDialog from "./AddTaskDialog";
-import { useCurrentBoard } from "@/hooks/use-board";
+
+import { useBoardContext } from "@/contexts/BoardContext";
 
 export default function AddTaskBtn() {
-    const { statuses } = useCurrentBoard();
+    const { statuses } = useBoardContext();
 
     return (
 
