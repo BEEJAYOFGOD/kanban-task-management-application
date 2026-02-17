@@ -2,10 +2,16 @@
 
 import Column from "./Column";
 import { useBoardContext } from "@/contexts/BoardContext";
+import { usePreloadedQuery, Preloaded } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 
-export default function Board() {
-    const { currentBoard } = useBoardContext();
+export default function Board({ preloadedFullBoard }: { preloadedFullBoard?: Preloaded<typeof api.queries.boards.getFullBoard> }) {
+    const { currentBoard: boardFromContext } = useBoardContext();
+
+    // If we have preloaded data, use it. Otherwise, use what's in the context.
+    const preloadedBoard = preloadedFullBoard ? usePreloadedQuery(preloadedFullBoard) : undefined;
+    const currentBoard = preloadedBoard ?? boardFromContext;
 
     if (!currentBoard) {
         return <div>No board selected</div>

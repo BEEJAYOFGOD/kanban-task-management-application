@@ -15,21 +15,31 @@ interface BoardContextType {
     isLoading: boolean;
 }
 
+type PreloadedFullBoard = Preloaded<typeof api.queries.boards.getFullBoard>;
+
 const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
 export function BoardProvider({
     children,
-    preloadedBoards
+    preloadedBoards,
+    preloadedFullBoard
 }: {
     children: ReactNode;
     preloadedBoards: Preloaded<typeof api.queries.boards.getAll>;
+        preloadedFullBoard?: PreloadedFullBoard;
 }) {
     const boards = usePreloadedQuery(preloadedBoards);
     const params = useParams();
     const boardId = params.id as Id<"boards">;
-    const fullBoard = useQuery(api.queries.boards.getFullBoard,
-        boardId ? { boardId } : "skip"
+
+    // Use preloaded query if available, otherwise fallback to useQuery
+    const fullBoardFromPreload = preloadedFullBoard ? usePreloadedQuery(preloadedFullBoard) : undefined;
+
+    const fullBoardFromQuery = useQuery(api.queries.boards.getFullBoard,
+        boardId && !preloadedFullBoard ? { boardId } : "skip"
     );
+
+    const fullBoard = fullBoardFromPreload ?? fullBoardFromQuery;
 
     const activeBoardFromList = boards?.find((b) => b._id === boardId);
 

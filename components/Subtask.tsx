@@ -8,11 +8,9 @@ import ViewTaskDialog from "./ViewTaskDialog";
 export default function Subtask({ task }: { task: Task }) {
     const noOfCompleted = task.subtasks?.filter((subtask) => subtask.isCompleted).length ?? 0;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isViewd, setisViewd] = useState({} as Task);
 
     const viewTask = () => {
         setIsDialogOpen(true);
-        setisViewd(task);
     }
 
 
@@ -26,7 +24,7 @@ export default function Subtask({ task }: { task: Task }) {
             </Card>
 
 
-            <ViewTaskDialog task={isViewd} onOpenChange={setIsDialogOpen} open={isDialogOpen} />
+            <ViewTaskDialog task={task} onOpenChange={setIsDialogOpen} open={isDialogOpen} />
         </>
     )
 }
