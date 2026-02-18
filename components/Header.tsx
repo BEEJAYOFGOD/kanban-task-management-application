@@ -16,7 +16,7 @@ export default function Header() {
                 <p>Kanban</p>
             </div>
             <div className="flex p-4 flex-1 justify-between border-b-sidebar-border/20 border-b items-center">
-                <h1 className="text-xl font-bold">{boardName || "No Board Selected"}</h1>
+                <h1 className="text-xl font-bold">{boardName || "Create a board to get started"}</h1>
 
                 <AddTaskBtn />
 

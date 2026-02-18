@@ -32,7 +32,7 @@ export function BoardProvider({
 
     // This will also subscribe to the same fetch in the slug page
     const currentBoard = useQuery(api.queries.boards.getFullBoard,
-        { boardId }
+        boardId ? { boardId } : "skip"
     );
 
     const activeBoardFromList = boards?.find((b) => b._id === boardId);
