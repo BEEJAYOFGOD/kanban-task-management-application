@@ -19,8 +19,4 @@ export default async function Dashboard() {
 
     // Show empty state if no boards
     return <DashboardEmpty />;
-
-
-
-    // return <BoardsList preloaded={preloadedBoards} />;
 }
