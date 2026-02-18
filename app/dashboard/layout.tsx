@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AppSidebar from "@/components/Sidebar";
+import AppSidebar from "@/components/AppSidebar";
 import Header from "@/components/Header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { preloadQuery } from "convex/nextjs";
