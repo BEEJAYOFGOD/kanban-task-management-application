@@ -46,6 +46,7 @@ export default function ViewTaskDialog({
                     ...board,
 
                     columns: board.columns.map((col: Column) => ({
+
                         ...col,
                         tasks: col.tasks.map((t: Task) => ({
                             ...t,

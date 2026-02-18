@@ -55,6 +55,7 @@ export const getFullBoard = query({
                 // Get subtasks for each task
                 const tasksWithSubtasks = await Promise.all(
                     tasks.map(async (task) => {
+
                         const subtasks = await ctx.db
                             .query("subtasks")
                             .withIndex("by_task", (q) => q.eq("taskId", task._id))
@@ -169,6 +170,7 @@ export const updateTask = mutation({
 export const deleteTask = mutation({
     args: { taskId: v.id("tasks") },
     handler: async (ctx, args) => {
+
         // Delete subtasks first
         const subtasks = await ctx.db
             .query("subtasks")
@@ -204,3 +206,19 @@ export const addColumn = mutation({
         });
     },
 });
+
+
+export const addBoard = mutation({
+    args: {
+        name: v.string()
+    },
+
+    handler: async (ctx, args) => {
+
+        const board = await ctx.db.insert("boards", {
+            name: args.name
+        })
+
+        return board;
+    }
+})

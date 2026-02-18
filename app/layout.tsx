@@ -5,8 +5,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ConvexClientProvider } from "./convexdb/ConvexProvider";
 
-const geistSans = Geist({
+const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-Jakarta-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -25,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable}  antialiased`}
+        className={`${jakartaSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
           <TooltipProvider>
