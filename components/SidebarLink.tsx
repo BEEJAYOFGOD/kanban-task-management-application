@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
-import { NavLink } from "./Sidebar";
+import { NavLink } from "./AppSidebar";
 import { usePathname } from "next/navigation";
 
 
