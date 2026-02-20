@@ -1,14 +1,13 @@
 "use client"
-
 import {
     createContext,
     type ReactNode,
     useContext,
     useEffect,
+    useRef,
     useState,
 } from "react";
-
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark";
 
 type ThemeContext = {
     theme: Theme;
@@ -17,31 +16,32 @@ type ThemeContext = {
 
 const ThemeContext = createContext<ThemeContext | null>(null);
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-    const [theme, setTheme] = useState<Theme>("dark");
-
-    useEffect(() => {
-        // this code runs to check if the user has a saved theme in localStorage
-        // it also checks to know what the user selected in the system settings
-        document.documentElement.classList.toggle(
-            "dark",
-            localStorage.theme === "dark" ||
-            (!("theme" in localStorage) &&
-                window.matchMedia("(prefers-color-scheme: dark)").matches)
-        );
-
-        const storedTheme = localStorage.getItem("theme") as Theme | "light";
-
-        if (storedTheme) {
-            setTheme(storedTheme);
+export const ThemeProvider = ({ defaultTheme, children }: { defaultTheme: Theme | null, children: ReactNode }) => {
+    const [theme, setTheme] = useState<Theme>(() => {
+        if (defaultTheme) return defaultTheme;
+        // fallback to system preference on client
+        if (typeof window !== 'undefined') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         }
-    }, []);
 
+        return 'dark'
+    });
+
+    const setThemeCookie = (theme: Theme) => {
+        document.cookie = `theme=${theme}; path=/; max-age=31536000`
+    }
+
+    const isMounted = useRef(false);
 
     useEffect(() => {
-        localStorage.setItem("theme", theme);
+        if (!isMounted.current) {
+            isMounted.current = true
+            return
+        }
+        setThemeCookie(theme);
         document.documentElement.classList.toggle("dark", theme === "dark");
     }, [theme]);
+
 
     // Listen for system theme changes
     useEffect(() => {
@@ -50,7 +50,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         const handleChange = (e: MediaQueryListEvent) => {
             const newTheme = e.matches ? "dark" : "light";
             setTheme(newTheme);
-            localStorage.setItem("theme", newTheme);
+            setThemeCookie(newTheme);
         };
 
         mediaQuery.addEventListener("change", handleChange);
