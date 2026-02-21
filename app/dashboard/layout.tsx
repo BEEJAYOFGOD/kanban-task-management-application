@@ -22,8 +22,6 @@ export default async function DashboardLayout({
     const cookieStore = await cookies();
     const savedState = cookieStore.get("sidebar_state")?.value === "true";
 
-
-
     return (
         <SidebarProvider defaultOpen={savedState}>
             <BoardProvider preloadedBoards={preloaded}>

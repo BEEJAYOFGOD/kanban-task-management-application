@@ -1,9 +1,19 @@
+'use client'
+
 import DashboardEmpty from "@/components/DashboardEmpty"
+import { useBoardContext } from "@/contexts/BoardContext";
 
+export default function Dashboard() {
+    const { boards } = useBoardContext();
 
-export default async function Dashboard() {
-    // const preloadedBoards = await preloadQuery(api.queries.boards.getAll);
     // Show empty state if no boards
-    // There's already a proxy for this page that redirects to the first board if it exists
-    return <DashboardEmpty />;
+    if (!boards || boards.length === 0) {
+        return <DashboardEmpty />;
+    }
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-full space-y-4">
+            <h1>There's currently no board selected. Click a board on the Sidebar to view.</h1>
+        </div>
+    );
 }

@@ -13,7 +13,7 @@ export interface Column {
     boardId: Id<"boards">;
     name: string;
     tasks: Task[];
-    order: number;
+    // order: number;
 }
 
 export interface Task {

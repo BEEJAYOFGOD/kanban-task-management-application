@@ -357,7 +357,6 @@ export const seedDatabase = mutation({
                 const columnId = await ctx.db.insert("columns", {
                     name: columnData.name,
                     boardId,
-                    order: colIndex,
                 });
 
                 // Insert tasks

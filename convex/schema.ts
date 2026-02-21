@@ -9,7 +9,7 @@ export default defineSchema({
     columns: defineTable({
         name: v.string(),
         boardId: v.id("boards"),
-        order: v.number(), // for ordering columns
+        // order: v.number(), // for ordering columns
     }).index("by_board", ["boardId"]),
 
     tasks: defineTable({
