@@ -1,11 +1,10 @@
 'use client'
 import { Task } from "@/types/Boards";
 import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import AddNewColumnBtn from "./AddNewColumnBtn";
 import { useState } from "react";
 import ViewTaskDialog from "./ViewTaskDialog";
 
-export default function Subtask({ task }: { task: Task }) {
+export default function TaskCard({ task }: { task: Task }) {
     const noOfCompleted = task.subtasks?.filter((subtask) => subtask.isCompleted).length ?? 0;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 

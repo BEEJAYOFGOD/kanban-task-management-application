@@ -30,7 +30,7 @@ export default async function RootLayout({
 }>) {
 
   const cookieStore = await cookies();
-  const savedThemeState = (cookieStore.get("theme")?.value ?? null) as Theme | null
+  const savedThemeState = (cookieStore.get("theme")?.value ?? null) as Theme | null;
 
   return (
     <html lang="en" className={savedThemeState === 'dark' ? 'dark' : ''}>
@@ -38,17 +38,12 @@ export default async function RootLayout({
 
         <script dangerouslySetInnerHTML={{
           __html: `
+                        // this is fallback for when a user
                         (function() {
-
-                            const saved = document.cookie.match(/theme=([^;]+)/)?.[1];
-
-                            if (saved === 'dark') {
-                                document.documentElement.classList.add('dark');
-                            } else if (saved === 'light') {
-                                document.documentElement.classList.remove('dark');
-                            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                                document.documentElement.classList.add('dark');
-                            }
+                           const saved = document.cookie.match(/theme=([^;]+)/)?.[1];
+                           if (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                               document.documentElement.classList.add('dark');
+                           }
                         })()
                     `
         }} />

@@ -1,4 +1,4 @@
-import Subtask from "./Subtask";
+import TaskCard from "./Task";
 import type { Column } from "@/types/Boards";
 import { useMemo } from "react";
 
@@ -37,7 +37,7 @@ export default function Column({ column }: { column: Column }) {
 
             <div className="flex gap-2 flex-col">
                 {tasks.map((task, idx) => (
-                    <Subtask key={idx} task={task} />
+                    <TaskCard key={idx} task={task} />
                 ))}
             </div>
         </div>

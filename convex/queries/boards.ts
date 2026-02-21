@@ -149,6 +149,29 @@ export const createTask = mutation({
     },
 });
 
+export const createBoard = mutation({
+    args: {
+        name: v.string(),
+        columns: v.array(v.string())
+    },
+
+    handler: async (ctx, args) => {
+        const boardId = await ctx.db.insert("boards", {
+            name: args.name
+        });
+
+
+
+        for (const column of args.columns) {
+            await ctx.db.insert("columns", {
+                name: column,
+                order: args.columns.indexOf(column),
+                boardId,
+            });
+        }
+    }
+})
+
 // Update task details
 export const updateTask = mutation({
     args: {

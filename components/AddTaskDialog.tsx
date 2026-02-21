@@ -1,4 +1,3 @@
-'use client'
 import { Button } from "./ui/button";
 import {
     Dialog,
@@ -16,15 +15,17 @@ import Image from "next/image";
 import { Textarea } from "./ui/textarea";
 import { useState } from "react";
 import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-
-
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useBoardContext } from "@/contexts/BoardContext";
 import { Column } from "@/types/Boards";
+import SubtaskInput from "./SubtaskInput";
+
 
 export default function AddNewTaskDialog() {
     const { statuses, boardId, currentBoard } = useBoardContext();
+
+    console.log('statuses', statuses);
     const createTask = useMutation(api.queries.boards.createTask);
 
     const [subtasks, setSubtasks] = useState<string[]>(["", ""]);
@@ -43,6 +44,7 @@ export default function AddNewTaskDialog() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         setSubtasks((prev) => {
             const newSubtask = [...prev];
+
             newSubtask[index] = e.target.value;
             return newSubtask;
         })
@@ -69,81 +71,101 @@ export default function AddNewTaskDialog() {
         setTitle("");
         setDescription("");
         setSubtasks(["", ""]);
+    };
+
+    const clearForm = () => {
+        setTitle('');
+        setDescription('');
+        setSubtasks(["", ""])
     }
 
+
+
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button>Add New Task</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-sm" showCloseButton={false}>
-                <form onSubmit={handleSubmit}>
-                    <DialogHeader >
-                        <div className="flex justify-between items-center">
-                            <DialogTitle>
-                                Add New Task
-                            </DialogTitle>
-                        </div>
-                    </DialogHeader>
-                    <FieldGroup>
-                        <Field>
-                            <Label htmlFor="title">Title</Label>
-                            <Input
-                                type="text"
-                                id="title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="e.g. Take coffee break"
-                                required
-                            />
-                        </Field>
-
-                        <Field>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="e.g. It's always good to take a break."
-                            />
-                        </Field>
-
-                        <Field>
-                            <Label>Subtasks</Label>
-                            {subtasks.map((subtask, index) => (
-                                <div key={index} className="flex items-center gap-4 mb-2">
-                                    <Input
-                                        onChange={(e) => handleInputChange(e, index)}
-                                        type="text"
-                                        value={subtask}
-                                        placeholder="e.g. Make coffee"
-                                    />
-                                    <Image src={closeBtn} onClick={() => removeSubtask(index)} alt="closeBtn" className="w-4 h-4 cursor-pointer" />
+        <>
+            {currentBoard &&
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                        <Button >Add New Tasky</Button>
+                    </DialogTrigger>
+                    <DialogContent
+                        onEscapeKeyDown={clearForm}
+                        onPointerDownOutside={clearForm}
+                        className="sm:max-w-sm" showCloseButton={false}>
+                        <form onSubmit={handleSubmit}>
+                            <DialogHeader >
+                                <div className="flex justify-between items-center mb-6">
+                                    <DialogTitle>
+                                        Add New Task
+                                    </DialogTitle>
                                 </div>
-                            ))}
-                        </Field>
-                    </FieldGroup>
+                            </DialogHeader>
+                            <FieldGroup>
+                                <Field>
+                                    <Label htmlFor="title">Title</Label>
+                                    <Input
+                                        type="text"
+                                        id="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="e.g. Take coffee break"
+                                        required
+                                    />
+                                </Field>
 
-                    <div className="mt-4 flex flex-col gap-4">
-                        <Button type="button" onClick={() => addNewSubTask()} className="w-full" variant="outline">+ Add New Subtask</Button>
+                                <Field>
+                                    <Label htmlFor="description">Description</Label>
+                                    <Textarea
+                                        id="description"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        placeholder="e.g. It's always good to take a break."
+                                    />
+                                </Field>
 
-                        <div className="space-y-2 w-full">
-                            <Label htmlFor="task-status">Status</Label>
-                            <Select onValueChange={setStatus} value={status || statuses[0]}>
-                                <SelectTrigger className="w-full" id="task-status">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="mt-12 w-full">
-                                    {statuses.map(s =>
-                                        <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                <Field>
+                                    <Label>Subtasks</Label>
 
-                        <Button className="w-full" type="submit">Create Task</Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog >
+                                    <div className="h-24 overflow-y-auto
+                             [&::-webkit-scrollbar]:w-2 pr-2
+                             [&::-webkit-scrollbar-track]:bg-dashboard-bg
+                             [&::-webkit-scrollbar-track]:dark:bg-background
+                             [&::-webkit-scrollbar-thumb]:bg-primary
+                             [&::-webkit-scrollbar-thumb]:dark:bg-primary
+                             [&::-webkit-scrollbar-thumb]:rounded-full"
+                                    >
+
+                                        {subtasks.map((subtask, index) => (
+                                            <SubtaskInput key={index} index={index} subtask={subtask} handleInputChange={handleInputChange} removeSubtask={removeSubtask} />
+                                        ))}
+                                    </div>
+                                </Field>
+                            </FieldGroup>
+
+                            <div className="mt-4 flex flex-col gap-4">
+                                <Button type="button" onClick={() => addNewSubTask()} className="w-full" variant="outline">+ Add New Subtask</Button>
+
+                                <div className="space-y-2 w-full">
+                                    <Label htmlFor="task-status">Status</Label>
+
+                                    <Select onValueChange={setStatus} value={status || statuses[0]}>
+                                        <SelectTrigger className="w-full" id="task-status">
+                                            <SelectValue />
+                                        </SelectTrigger>
+
+                                        <SelectContent className="mt-12 w-full">
+                                            {statuses.map(s =>
+                                                <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <Button className="w-full" type="submit">Create Task</Button>
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog >}
+        </>
+
     )
 }

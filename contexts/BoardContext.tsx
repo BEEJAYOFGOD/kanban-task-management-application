@@ -26,6 +26,7 @@ export function BoardProvider({
     children: ReactNode;
         preloadedBoards: Preloaded<typeof api.queries.boards.getAll>;
 }) {
+
     const boards = usePreloadedQuery(preloadedBoards);
     const params = useParams();
     const boardId = params.id as Id<"boards">;

@@ -8,7 +8,8 @@ export function useCurrentBoard() {
     const boardId = params.id as Id<"boards">;
 
     const boards = useQuery(api.queries.boards.getAll);
-    const board = useQuery(api.queries.boards.getFullBoard, boardId ? { boardId } : "skip");
+    const board = useQuery(api.queries.boards.getFullBoard,
+        boardId ? { boardId } : "skip");
 
     const preloadedBoard = boards?.find((b) => b._id === boardId);
 
