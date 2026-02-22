@@ -7,11 +7,10 @@ import { api } from "@/convex/_generated/api";
 
 export default function Board({ preloadedFullBoard }: { preloadedFullBoard: Preloaded<typeof api.queries.boards.getFullBoard> }) {
     // If we have preloaded data, use it. Otherwise, use what's in the context.
-    const preloadedBoard = usePreloadedQuery(preloadedFullBoard);
-    const currentBoard = preloadedBoard;
+    const currentBoard = usePreloadedQuery(preloadedFullBoard);
 
     if (!currentBoard) {
-        return <div>No board selected</div>
+        return <div>Board Not Found</div>
     }
 
     return (

@@ -1,5 +1,3 @@
-import Option from "@/public/icons/headeroptions.png";
-import Image from "next/image";
 import AddNewTaskDialog from "./AddTaskDialog";
 import MoreOptions from "./MoreOptions";
 

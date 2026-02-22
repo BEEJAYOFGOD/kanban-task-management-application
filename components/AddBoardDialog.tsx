@@ -9,7 +9,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react"; // Add useEffect
+import { useState, useEffect, useMemo } from "react"; // Add useEffect
 import SubtaskInput from "./SubtaskInput";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -33,80 +33,91 @@ export default function AddNewBoardDialog({
     onOpenChange,
 }: AddNewColumnDialogProps) {
     const { currentBoard } = useBoardContext();
-    const defaultColumns = [{ name: "Todo" }, { name: "Doing" }];
+    const defaultColumns: ColumnInput[] = [{ name: "Todo" }, { name: "Doing" }];
     const [columns, setColumns] = useState<ColumnInput[]>(defaultColumns);
     const [boardName, setBoardName] = useState("");
 
-
     const createBoard = useMutation(api.queries.boards.createBoard);
     const updateBoard = useMutation(api.queries.boards.updateBoard);
-    const [editMount, setEditMount] = useState(false);
 
-
-    // Sync state when dialog opens in edit mode
+    // Only sync when dialog opens/closes
     useEffect(() => {
-        if (open && edit && currentBoard) {
-            setBoardName(currentBoard.name || "");
-            setColumns(currentBoard.columns || defaultColumns);
-        } else if (open && !edit) {
-            // Reset for "Add New" mode
-            setBoardName("");
-            setColumns(defaultColumns);
-        }
-    }, [open, edit, currentBoard]);
+        if (open) {
+            if (edit && currentBoard) {
+                setBoardName(currentBoard.name || "");
+                setColumns(currentBoard.columns?.map(col => ({
+                    _id: col._id,
+                    name: col.name
+                })) || defaultColumns);
 
+            } else {
+                setBoardName("");
+                setColumns(defaultColumns);
+            }
+        }
+    }, [open]);
 
     const removeSubtask = (index: number) => {
         setColumns(columns.filter((_, i) => i !== index));
     };
 
-
     const addNewSubTask = () => {
-        setColumns([...columns, { name: "" }])
-    }
+        setColumns([...columns, { name: "" }]);
+    };
+
+    const hasChanges = useMemo(() => {
+        if (!edit || !currentBoard) return false;
+
+        // Check name change
+        const nameChanged = boardName !== currentBoard.name;
+
+        // Check columns change
+        const originalColumns = currentBoard.columns || [];
+
+        // Different number of columns
+        if (columns.length !== originalColumns.length) return true;
+
+        // Check if any column name changed
+        const columnsChanged = columns.some((col, index) => {
+            const original = originalColumns[index];
+            return col.name !== original?.name || col._id !== original?._id;
+        });
+
+        return nameChanged || columnsChanged;
+    }, [edit, currentBoard, boardName, columns]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        if (editMount == false) {
-            setEditMount(true)
-        }
-
         setColumns((prev) => {
-            const newSubtask = [...prev];
-            newSubtask[index].name = e.target.value;
-            return newSubtask;
-        })
-    }
+            const newColumns = [...prev];
+            newColumns[index].name = e.target.value;
+            return newColumns;
+        });
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (edit && currentBoard) {
-            updateBoard({
-                boardId: currentBoard?._id,
-                name: boardName,
-                columns: columns.map(col => ({
-                    _id: col._id,
-                    name: col.name
-                }))
-
+            await updateBoard({
+                boardId: currentBoard._id,
+                ...(boardName !== currentBoard.name && { name: boardName }),
+                columns
             });
-
-
         } else {
             await createBoard({
-            name: boardName,
-            columns
-        });
-
+                name: boardName,
+                columns
+            });
         }
 
         onOpenChange(false);
-    }
+        clearForm();
+    };
 
     const clearForm = () => {
         setBoardName("");
-        setColumns(defaultColumns)
-    }
+        setColumns(defaultColumns);
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,9 +141,6 @@ export default function AddNewBoardDialog({
                             <Input
                                 required
                                 onChange={(e) => {
-                                    if (editMount == false) {
-                                        setEditMount(true)
-                                    }
                                     setBoardName(e.target.value)
                                 }}
                                 type="text"
@@ -174,7 +182,7 @@ export default function AddNewBoardDialog({
                             <Button onClick={() => addNewSubTask()} className="w-full" variant="outline">
                                 + Add New Column
                             </Button>
-                            <Button disabled={edit && !editMount} className="w-full" type="submit">
+                            <Button disabled={edit && !hasChanges} className="w-full" type="submit">
                                 {edit ? "Save Changes" : "Create New Board"}
                             </Button>
                         </div>
@@ -182,5 +190,5 @@ export default function AddNewBoardDialog({
                 </form>
             </DialogContent>
         </Dialog>
-    )
+    );
 }

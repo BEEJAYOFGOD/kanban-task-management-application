@@ -5,6 +5,7 @@ import { Id } from "../_generated/dataModel";
 
 export const getAll = query({
     args: {},
+
     handler: async (ctx) => {
         return await ctx.db.query("boards").collect();
     },
