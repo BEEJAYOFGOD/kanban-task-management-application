@@ -23,19 +23,23 @@ export default function DeleteBoardDialog({ currentBoard, open, onOpenChange }: 
     }
 
     const delBoard = async () => {
-
         setIsDeleting(true);
-        if (currentBoard) {
-            await deleteBoard({ boardId: currentBoard._id });
+
+        try {
+            if (currentBoard) {
+                // Navigate optimistically
+                close();
+                router.push("/dashboard");
+
+                await deleteBoard({ boardId: currentBoard._id });
+            }
+        } catch (error) {
+            // If deletion fails, navigate back and show error
+            router.push(`/board/${currentBoard?._id}`);
+            // show error toast/message here
+        } finally {
+            setIsDeleting(false);
         }
-
-        setIsDeleting(false);
-
-        close();
-        router.push("/dashboard");
-
-
-
     }
 
 

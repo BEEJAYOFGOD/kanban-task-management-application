@@ -11,7 +11,7 @@ interface BoardContextType {
     currentBoard: Board | undefined | null;
     boardId: Id<"boards"> | undefined;
     boardName: string | undefined;
-    statuses: string[];
+    statuses: Column[];
     isLoading: boolean;
 }
 
@@ -42,7 +42,7 @@ export function BoardProvider({
         currentBoard,
         boardId,
         boardName: activeBoardFromList?.name,
-        statuses: currentBoard?.columns?.map((column: Column) => column.name) ?? [],
+        statuses: currentBoard?.columns ?? [],
         isLoading: !currentBoard && !!boardId,
     };
 

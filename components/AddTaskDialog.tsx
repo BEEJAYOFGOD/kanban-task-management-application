@@ -17,20 +17,29 @@ import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from ".
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useBoardContext } from "@/contexts/BoardContext";
-import { Column } from "@/types/Boards";
+import { Column, Task } from "@/types/Boards";
 import SubtaskInput from "./SubtaskInput";
 
+interface AddTaskDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    mode: "edit" | 'add';
+    task?: Task;
+}
 
-export default function AddNewTaskDialog() {
+export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: AddTaskDialogProps) {
     const { statuses, boardId, currentBoard, boards } = useBoardContext();
+    const createTask = useMutation(api.queries.boards.createTask)
 
     console.log('statuses', statuses);
-    const createTask = useMutation(api.queries.boards.createTask);
 
     const [subtasks, setSubtasks] = useState<string[]>(["", ""]);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("");
+
+    console.log(status);
+
     const [isOpen, setIsOpen] = useState(false);
 
     const addNewSubTask = () => {
@@ -54,13 +63,13 @@ export default function AddNewTaskDialog() {
         if (!boardId || !currentBoard) return;
 
         // Find the column ID for the selected status
-        const selectedColumn = currentBoard.columns?.find((c: Column) => c.name === (status || statuses[0]));
+        const selectedColumn = currentBoard.columns?.find((c: Column) => c.name === (status));
         if (!selectedColumn) return;
 
         await createTask({
             title,
             description,
-            status: status || statuses[0],
+            status: status,
             columnId: selectedColumn._id,
             boardId,
             subtasks: subtasks.filter(s => s.trim() !== "").map(s => ({ title: s }))
@@ -81,13 +90,21 @@ export default function AddNewTaskDialog() {
 
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
+
+        <Dialog open={isOpen || open} onOpenChange={setIsOpen || onOpenChange}>
+            <DialogTrigger asChild className={`${mode === 'edit' && 'hidden'}`}>
                 <Button disabled={boards?.length == 0} >+ Add New Task</Button>
             </DialogTrigger>
             <DialogContent
-                onEscapeKeyDown={clearForm}
-                onPointerDownOutside={clearForm}
+                onEscapeKeyDown={() => {
+                    onOpenChange(false);
+                    clearForm();
+                }
+                }
+                onPointerDownOutside={() => {
+                    onOpenChange(false);
+                    clearForm();
+                }}
                 className="sm:max-w-sm" showCloseButton={false}>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader >
@@ -145,14 +162,14 @@ export default function AddNewTaskDialog() {
                         <div className="space-y-2 w-full">
                             <Label htmlFor="task-status">Status</Label>
 
-                            <Select onValueChange={setStatus} value={status || statuses[0]}>
+                            <Select onValueChange={setStatus} defaultValue={statuses?.[0]?.name}>
                                 <SelectTrigger className="w-full" id="task-status">
                                     <SelectValue />
                                 </SelectTrigger>
 
                                 <SelectContent className="mt-12 w-full">
-                                    {statuses.map(s =>
-                                        <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                    {statuses?.map(s =>
+                                        <SelectItem key={s._id} value={s.name}>{s.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
