@@ -5,16 +5,20 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Task } from "@/types/Boards";
 
 
 interface DeleteBoardDialogProps {
-    currentBoard: Board | null | undefined;
+    currentBoard?: Board | null | undefined;
+    taskId?: Task;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
-export default function DeleteBoardDialog({ currentBoard, open, onOpenChange }: DeleteBoardDialogProps) {
+export default function DeleteBoardDialog({ currentBoard, taskId, open, onOpenChange }: DeleteBoardDialogProps) {
     const deleteBoard = useMutation(api.queries.boards.deleteBoard);
+    const deleteTask = useMutation(api.queries.boards.deleteTask);
+
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
 
@@ -29,9 +33,13 @@ export default function DeleteBoardDialog({ currentBoard, open, onOpenChange }: 
             if (currentBoard) {
                 // Navigate optimistically
                 close();
-                router.push("/dashboard");
 
                 await deleteBoard({ boardId: currentBoard._id });
+            } else if (taskId) {
+                close();
+
+                await deleteTask({ taskId: taskId._id });
+
             }
         } catch (error) {
             // If deletion fails, navigate back and show error
@@ -50,7 +58,7 @@ export default function DeleteBoardDialog({ currentBoard, open, onOpenChange }: 
                     <DialogTitle className="text-[#EA5555]">Delete This Board</DialogTitle>
                 </DialogHeader>
                 <DialogDescription className="text-medium-gray">
-                    {`Are you sure you want to delete the ‘${currentBoard?.name}’ board? This action will remove all columns and tasks and cannot be reversed.`}
+                    {`Are you sure you want to delete the ‘${currentBoard ? currentBoard?.name : taskId?.title}’ ${currentBoard ? 'board' : 'task'}? This action will ${currentBoard ? 'remove all columns and tasks' : 'remove the task'} and cannot be reversed.`}
                 </DialogDescription>
                 <DialogFooter >
 

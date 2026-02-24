@@ -20,11 +20,12 @@ import { useState } from "react";
 import Option from "@/public/icons/headeroptions.png";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup } from "@/components/ui/dropdown-menu"
 import AddNewTaskDialog from "./AddTaskDialog";
+import DeleteBoardDialog from "./DeleteBoardDialog";
 
 interface ViewTaskDialogProps {
     mode?: "edit" | 'add';
     open?: boolean;
-    onOpenChange: (open: boolean) => void;
+    onViewTaskDialog: (open: boolean) => void;
     task: Task;
 }
 
@@ -32,7 +33,7 @@ export default function ViewTaskDialog({
     mode = "edit",
     open = false,
     task,
-    onOpenChange,
+    onViewTaskDialog,
 }: ViewTaskDialogProps) {
 
     const { statuses, boardId } = useBoardContext();
@@ -91,96 +92,103 @@ export default function ViewTaskDialog({
     return (
         <>
             {editTask == true ?
-                <AddNewTaskDialog open={editTask} onOpenChange={() => { setEdiTask(false); onOpenChange(false); }} mode="edit" task={task} /> :
-                <Dialog open={open} onOpenChange={onOpenChange}>
-                    <form>
-                        <DialogTrigger asChild>
-                            {mode == "add" && <Button>Add New Column</Button>}
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-sm" showCloseButton={false}>
-                            <DialogHeader >
-                                <div className="flex justify-between flex-col items-left">
-                                    <DialogTitle>
-                                        <div className="flex justify-between">
-                                            <p className="text-base">{task.title}</p>
+                <AddNewTaskDialog open={editTask} onOpenChange={() => { setEdiTask(false); onViewTaskDialog(false); }} mode="edit" task={task} />
+
+                :
+                delTask == true ?
+
+                    <DeleteBoardDialog open={delTask} onOpenChange={() => { setDelTask(false); onViewTaskDialog(false); }} taskId={task} />
+                    :
+
+                    <Dialog open={open} onOpenChange={onViewTaskDialog}>
+                        <form>
+                            <DialogTrigger asChild>
+                                {mode == "add" && <Button>Add New Column</Button>}
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-sm" showCloseButton={false}>
+                                <DialogHeader >
+                                    <div className="flex justify-between flex-col items-left">
+                                        <DialogTitle>
+                                            <div className="flex justify-between">
+                                                <p className="text-base">{task.title}</p>
 
 
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Image src={Option} alt="Option" className="w-1" />
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="mt-4">
-                                                    <DropdownMenuGroup>
-                                                        <DropdownMenuItem onClick={() => setEdiTask(true)}>
-                                                            Edit Task
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuGroup>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Image src={Option} alt="Option" className="w-1" />
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent className="mt-4">
+                                                        <DropdownMenuGroup>
+                                                            <DropdownMenuItem onClick={() => setEdiTask(true)}>
+                                                                Edit Task
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuGroup>
 
-                                                    <DropdownMenuGroup>
-                                                        <DropdownMenuItem onClick={() => setDelTask(true)} variant="destructive">
-                                                            Delete Task
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuGroup>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                                        <DropdownMenuGroup>
+                                                            <DropdownMenuItem onClick={() => setDelTask(true)} variant="destructive">
+                                                                Delete Task
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuGroup>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
 
-
-                                        </div>
-
-                                    </DialogTitle>
-
-                                    <DialogDescription className="text-xs text-medium-gray">{task.description}</DialogDescription>
-                                </div>
-                            </DialogHeader>
-
-
-                            <section className="space-y-4">
-                                <p>Subtasks ({task?.subtasks?.length > 0 ? noCompleted + " of " + task?.subtasks?.length : 0})</p>
-
-                                <ul className="space-y-2">
-                                    {task.subtasks?.map((subtask) => (
-                                        <div
-                                            key={subtask._id}
-                                            onClick={() => toggleTaskStatus(subtask._id, subtask.isCompleted)}
-                                            className="bg-dashboard-bg gap-2 items-center flex p-2 rounded-md cursor-pointer hover:bg-medium-gray/10"
-                                        >
-                                            <div className={`${subtask.isCompleted ? "bg-primary " : "border-medium-gray/80 border bg-medium-gray/20"} w-6 h-6 flex items-center justify-center rounded-sm`}>
-                                                <Image width="4" height="4" src={checkIcon} alt="checkbox" className={`w-4 ${subtask.isCompleted ? "visible" : "invisible"}`} />
 
                                             </div>
-                                            <li className={`${subtask.isCompleted ? "line-through text-medium-gray" : ""} text-xs`}>{subtask.title}</li>
-                                        </div>
-                                    ))}
-                                </ul>
-                            </section>
 
-                            <DialogFooter>
-                                <div className="flex flex-col items-start w-full">
-                                    <p>Current Status</p>
+                                        </DialogTitle>
 
-                                    <Select onValueChange={async (e) => {
-                                        setCurrentStatus(e);
+                                        <DialogDescription className="text-xs text-medium-gray">{task.description}</DialogDescription>
+                                    </div>
+                                </DialogHeader>
 
-                                        const columnId = statuses?.find(s => s.name === e)?._id as Id<"columns">;
-                                        const taskId = task._id;
 
-                                        await updateTask({ columnId, taskId, status: e })
+                                <section className="space-y-4">
+                                    <p>Subtasks ({task?.subtasks?.length > 0 ? noCompleted + " of " + task?.subtasks?.length : 0})</p>
 
-                                    }} value={currentStatus}>
-                                        <SelectTrigger disabled={changeStatus} className={`w-full mt-4 ${changeStatus ? "border-medium-gray/20 border-2 animate-pulse" : ""}`}>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="w-full mt-18">
-                                            {statuses?.map(status => (
-                                                <SelectItem key={status._id} className="text-sm" value={status.name}>{status.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </DialogFooter>
-                        </DialogContent>
-                    </form>
-                </Dialog >}
+                                    <ul className="space-y-2">
+                                        {task.subtasks?.map((subtask) => (
+                                            <div
+                                                key={subtask._id}
+                                                onClick={() => toggleTaskStatus(subtask._id, subtask.isCompleted)}
+                                                className="bg-dashboard-bg gap-2 items-center flex p-2 rounded-md cursor-pointer hover:bg-medium-gray/10"
+                                            >
+                                                <div className={`${subtask.isCompleted ? "bg-primary " : "border-medium-gray/80 border bg-medium-gray/20"} w-6 h-6 flex items-center justify-center rounded-sm`}>
+                                                    <Image width="4" height="4" src={checkIcon} alt="checkbox" className={`w-4 ${subtask.isCompleted ? "visible" : "invisible"}`} />
+
+                                                </div>
+                                                <li className={`${subtask.isCompleted ? "line-through text-medium-gray" : ""} text-xs`}>{subtask.title}</li>
+                                            </div>
+                                        ))}
+                                    </ul>
+                                </section>
+
+                                <DialogFooter>
+                                    <div className="flex flex-col items-start w-full">
+                                        <p>Current Status</p>
+
+                                        <Select onValueChange={async (e) => {
+                                            setCurrentStatus(e);
+
+                                            const columnId = statuses?.find(s => s.name === e)?._id as Id<"columns">;
+                                            const taskId = task._id;
+
+                                            await updateTask({ columnId, taskId, status: e })
+
+                                        }} value={currentStatus}>
+                                            <SelectTrigger disabled={changeStatus} className={`w-full mt-4 ${changeStatus ? "border-medium-gray/50 border-dashed border-2 animate-pulse" : ""}`}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="w-full mt-18">
+                                                {statuses?.map(status => (
+                                                    <SelectItem key={status._id} className="text-sm" value={status.name}>{status.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </DialogFooter>
+                            </DialogContent>
+                        </form>
+                    </Dialog >}
         </>
     )
 }

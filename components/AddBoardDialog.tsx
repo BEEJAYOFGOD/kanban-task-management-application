@@ -66,7 +66,7 @@ export default function AddNewBoardDialog({
     };
 
     const hasChanges = useMemo(() => {
-        if (!edit || !currentBoard) return false;
+        if (!edit || !currentBoard) return true;
 
         // Check name change
         const nameChanged = boardName !== currentBoard.name;

@@ -4,7 +4,7 @@ import MoreOptions from "./MoreOptions";
 export default function AddTaskBtn() {
     return (
         <div className="flex gap-4 items-center">
-            <AddNewTaskDialog />
+            <AddNewTaskDialog open={false} onOpenChange={() => { }} mode="add" />
 
             <MoreOptions />
         </div>

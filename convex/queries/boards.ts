@@ -183,11 +183,49 @@ export const updateTask = mutation({
         description: v.optional(v.string()),
         status: v.optional(v.string()),
         columnId: v.optional(v.id("columns")),
+        subtasks: v.optional(v.array(v.object({
+            _id: v.optional(v.id("subtasks")),
+            title: v.string(),
+        })))
     },
 
     handler: async (ctx, args) => {
-        const { taskId, ...updates } = args;
+        const { taskId, subtasks, ...updates } = args;
 
+        const existingSubtasks = await ctx.db
+            .query("subtasks")
+            .withIndex("by_task", (q) => q.eq("taskId", taskId))
+            .collect();
+
+        if (subtasks) {
+            const incomingIds = new Set(
+                subtasks.map((s) => s._id).filter(Boolean)
+            );
+
+            // Delete subtasks that were removed
+            for (const existing of existingSubtasks) {
+
+                if (!incomingIds.has(existing._id)) {
+                    await ctx.db.delete(existing._id);
+                }
+
+            }
+
+            // Update or insert
+            for (const subtask of subtasks) {
+                if (subtask._id) {
+                    await ctx.db.patch(subtask._id, { title: subtask.title });
+                } else {
+                    await ctx.db.insert("subtasks", {
+                        title: subtask.title,
+                        isCompleted: false,
+                        taskId,
+                    });
+                }
+            }
+        }
+
+        // add other updates
         await ctx.db.patch(taskId, updates);
     },
 });
@@ -278,11 +316,12 @@ export const updateBoard = mutation({ // Fixed typo
             .filter((id): id is Id<"columns"> => id !== undefined);
 
         // Get columns to delete
+        // i.e filter out columns not included in incoming columns but on existingCOlumn  in db
         const deletedCols = existingColumns.filter(
             (col) => !undeletedColumnsId.includes(col._id)
         );
 
-        // Process each column
+        // This loop updates the columns name or add new columns
         for (const col of columns) {
             // check if it's an old column
             if (col._id) {
@@ -309,60 +348,28 @@ export const updateBoard = mutation({ // Fixed typo
             }
         }
 
-        // Delete removed columns
-        await Promise.all(
-            deletedCols.map((col) => ctx.db.delete(col._id))
-        );
+        // This loop deletes the columns that were deleted from the frontend
+        for (const col of deletedCols) {
+            const tasks = await ctx.db.query("tasks")
+                .withIndex("by_column", (q) => q.eq("columnId", col._id))
+                .collect();
+
+            for (const task of tasks) {
+                const subtasks = await ctx.db.query("subtasks")
+                    .withIndex("by_task", (q) => q.eq("taskId", task._id))
+                    .collect();
+
+                await Promise.all(subtasks.map((s) => ctx.db.delete(s._id)));
+                await ctx.db.delete(task._id);
+            }
+
+            await ctx.db.delete(col._id);
+        }
     }
 });
 
 
-// export const deleteBoard = mutation({
-//     args: {
-//         boardId: v.id("boards"),
-//     },
 
-//     handler: async (ctx, args) => {
-//         const existingColumns = await ctx.db.query("columns")
-//             .withIndex("by_board", (q) => q.eq("boardId", args.boardId))
-//             .collect();
-
-//         await Promise.all(
-//             existingColumns.map(async (column) => {
-//                 // Get tasks for this column (ordered)
-//                 const tasks = await ctx.db
-//                     .query("tasks")
-//                     .withIndex("by_column", (q) => q.eq("columnId", column._id))
-//                     .collect();
-
-
-//                 await Promise.all(
-//                     tasks.map(async (task) => {
-
-//                         const subtasks = await ctx.db
-//                             .query("subtasks")
-//                             .withIndex("by_task", (q) => q.eq("taskId", task._id))
-//                             .collect();
-
-//                         if (subtasks.length) {
-//                             await Promise.all(
-//                                 subtasks.map(async (subtask) => {
-//                                     await ctx.db.delete(subtask._id);
-//                                 })
-//                             )
-//                         }
-
-//                         await ctx.db.delete(task._id);
-//                     })
-
-//                 )
-//                 await ctx.db.delete(column._id);
-//             }
-//             ))
-
-//         await ctx.db.delete(args.boardId);
-//     }
-// })
 
 export const deleteBoard = mutation({
     args: {

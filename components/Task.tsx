@@ -23,7 +23,7 @@ export default function TaskCard({ task }: { task: Task }) {
             </Card>
 
 
-            <ViewTaskDialog task={task} onOpenChange={setIsDialogOpen} open={isDialogOpen} />
+            <ViewTaskDialog task={task} onViewTaskDialog={setIsDialogOpen} open={isDialogOpen} />
         </>
     )
 }

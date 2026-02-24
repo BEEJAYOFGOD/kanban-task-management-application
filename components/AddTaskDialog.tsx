@@ -12,13 +12,14 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "./ui/textarea";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useBoardContext } from "@/contexts/BoardContext";
 import { Column, Task } from "@/types/Boards";
 import SubtaskInput from "./SubtaskInput";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface AddTaskDialogProps {
     open: boolean;
@@ -29,21 +30,28 @@ interface AddTaskDialogProps {
 
 export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: AddTaskDialogProps) {
     const { statuses, boardId, currentBoard, boards } = useBoardContext();
-    const createTask = useMutation(api.queries.boards.createTask)
+    const createTask = useMutation(api.queries.boards.createTask);
+    const updateTask = useMutation(api.queries.boards.updateTask)
 
     console.log('statuses', statuses);
 
-    const [subtasks, setSubtasks] = useState<string[]>(["", ""]);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [status, setStatus] = useState("");
+    const emptyStatus = [{ title: "" }, { title: "" }];
+
+    const [subtasks, setSubtasks] = useState<{ _id?: Id<"subtasks">, title: string }[]>(
+        mode === "edit" ? (task?.subtasks ?? emptyStatus) : emptyStatus
+    );
+
+    const [title, setTitle] = useState(mode === 'edit' ? task?.title : "");
+    const [description, setDescription] = useState(mode === 'edit' ? task?.description : "");
+    const [status, setStatus] = useState(mode === 'edit' ? task?.status : statuses[0].name);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     console.log(status);
 
     const [isOpen, setIsOpen] = useState(false);
 
     const addNewSubTask = () => {
-        setSubtasks([...subtasks, ""])
+        setSubtasks([...subtasks, { title: '' }]);
     }
     const removeSubtask = (index: number) => {
         setSubtasks(subtasks.filter((_, i) => i !== index));
@@ -53,38 +61,100 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
         setSubtasks((prev) => {
             const newSubtask = [...prev];
 
-            newSubtask[index] = e.target.value;
+            newSubtask[index] = { ...newSubtask[index], title: e.target.value };
             return newSubtask;
         })
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!boardId || !currentBoard) return;
 
-        // Find the column ID for the selected status
-        const selectedColumn = currentBoard.columns?.find((c: Column) => c.name === (status));
-        if (!selectedColumn) return;
 
-        await createTask({
-            title,
-            description,
-            status: status,
-            columnId: selectedColumn._id,
-            boardId,
-            subtasks: subtasks.filter(s => s.trim() !== "").map(s => ({ title: s }))
-        });
 
-        setIsOpen(false);
-        setTitle("");
-        setDescription("");
-        setSubtasks(["", ""]);
+        try {
+
+
+            // Find the column ID for the selected status
+            console.log(task?.status, "task status");
+            console.log(currentBoard.columns, "current board columns");
+            const selectedColumn = currentBoard.columns?.find((c: Column) => c.name === (status));
+
+            console.log(selectedColumn);
+            if (!selectedColumn) return;
+
+            setIsSubmitting(true);
+
+            const subtasksToSend = subtasks.map(({ _id, title }) => ({ _id, title }));
+
+            if (mode == "edit" && task) {
+
+                await updateTask({
+                    taskId: task._id,
+                    title,
+                    description,
+                    status: status,
+                    columnId: selectedColumn._id,
+                    subtasks: subtasksToSend
+                });
+
+
+            } else {
+
+
+                await createTask({
+                    title: title!,
+                    description: description!,
+                    status: status!,
+                    columnId: selectedColumn._id,
+                    boardId,
+                    subtasks
+                });
+            }
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+
+        setIsSubmitting(false);
+        clearForm();
     };
 
+    const hasChanges = useMemo(() => {
+        if (mode !== "edit" || !task) return true;
+
+        // Check name change
+        const descriptionChanged = description !== task?.description;
+        const titleChanged = title !== task?.title;
+        const statusChanged = status !== task?.status;
+
+
+
+        // Check subtask change
+        const originalSubtasks = task.subtasks || [];
+
+        // Different number of columns
+        if (subtasks.length !== originalSubtasks.length) return true;
+
+        // Check if any column name changed
+        const subtasksChanged = subtasks.some((col, index) => {
+            const original = originalSubtasks[index];
+
+            return col.title !== original?.title || col._id !== original?._id;
+        });
+
+        return titleChanged || statusChanged || descriptionChanged || subtasksChanged;
+    }, [mode, task, description, status, subtasks]);
+
     const clearForm = () => {
-        setTitle('');
-        setDescription('');
-        setSubtasks(["", ""])
+        setIsOpen(false);
+        onOpenChange(false);
+        setTitle("");
+        setDescription("");
+        setSubtasks(emptyStatus);
     }
 
 
@@ -92,17 +162,19 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     return (
 
         <Dialog open={isOpen || open} onOpenChange={setIsOpen || onOpenChange}>
+
             <DialogTrigger asChild className={`${mode === 'edit' && 'hidden'}`}>
                 <Button disabled={boards?.length == 0} >+ Add New Task</Button>
             </DialogTrigger>
+
             <DialogContent
                 onEscapeKeyDown={() => {
-                    onOpenChange(false);
+                    { mode === 'edit' && onOpenChange(false) };
                     clearForm();
                 }
                 }
                 onPointerDownOutside={() => {
-                    onOpenChange(false);
+                    { mode === 'edit' && onOpenChange(false) };
                     clearForm();
                 }}
                 className="sm:max-w-sm" showCloseButton={false}>
@@ -110,7 +182,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                     <DialogHeader >
                         <div className="flex justify-between items-center mb-6">
                             <DialogTitle>
-                                Add New Task
+                                {`${mode === 'edit' ? 'Edit Task' : 'Add New Task'}`}
                             </DialogTitle>
                         </div>
                     </DialogHeader>
@@ -150,7 +222,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                             >
 
                                 {subtasks.map((subtask, index) => (
-                                    <SubtaskInput key={index} index={index} subtask={subtask} handleInputChange={handleInputChange} removeSubtask={removeSubtask} />
+                                    <SubtaskInput key={index} index={index} subtask={subtask.title} handleInputChange={handleInputChange} removeSubtask={removeSubtask} />
                                 ))}
                             </div>
                         </Field>
@@ -174,7 +246,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                             </Select>
                         </div>
 
-                        <Button className="w-full" type="submit">Create Task</Button>
+                        <Button disabled={isSubmitting || !hasChanges} className="w-full" type="submit">{`${mode === 'edit' ? 'Update Task' : 'Create Task'}`}</Button>
                     </div>
                 </form>
             </DialogContent>
