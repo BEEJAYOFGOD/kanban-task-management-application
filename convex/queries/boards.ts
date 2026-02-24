@@ -25,56 +25,63 @@ export const getBoardById = query({
 
 // This is the one query you need to render a full board!
 export const getFullBoard = query({
-    args: { boardId: v.id("boards") },
+    args: { boardId: v.string() },
 
     handler: async (ctx, args) => {
         // 1. Get the board
-        const board = await ctx.db.get(args.boardId);
+        try {
 
-        if (!board) return null;
 
-        // 2. Get all columns for this board (ordered)
-        const columns = await ctx.db
-            .query("columns")
-            .withIndex("by_board", (q) => q.eq("boardId", args.boardId))
-            .order("asc")
-            .collect();
+            const board = await ctx.db.get(args.boardId as Id<"boards">);
 
-        // Sort columns by order
-        // columns.sort((a, b) => a._creationTime - b._creationTime);
+            if (!board) return null;
 
-        // 3. For each column, get its tasks and subtasks
-        const columnsWithTasks = await Promise.all(
+            // 2. Get all columns for this board (ordered)
+            const columns = await ctx.db
+                .query("columns")
+                .withIndex("by_board", (q) => q.eq("boardId", args.boardId as Id<"boards">))
+                .order("asc")
+                .collect();
 
-            columns.map(async (column) => {
-                // Get tasks for this column (ordered)
-                const tasks = await ctx.db
-                    .query("tasks")
-                    .withIndex("by_column", (q) => q.eq("columnId", column._id))
-                    .collect();
+            // Sort columns by order
+            // columns.sort((a, b) => a._creationTime - b._creationTime);
 
-                // Sort tasks by order
-                tasks.sort((a, b) => a.order - b.order);
+            // 3. For each column, get its tasks and subtasks
+            const columnsWithTasks = await Promise.all(
 
-                // Get subtasks for each task
-                const tasksWithSubtasks = await Promise.all(
-                    tasks.map(async (task) => {
+                columns.map(async (column) => {
+                    // Get tasks for this column (ordered)
+                    const tasks = await ctx.db
+                        .query("tasks")
+                        .withIndex("by_column", (q) => q.eq("columnId", column._id))
+                        .collect();
 
-                        const subtasks = await ctx.db
-                            .query("subtasks")
-                            .withIndex("by_task", (q) => q.eq("taskId", task._id))
-                            .collect();
+                    // Sort tasks by order
+                    tasks.sort((a, b) => a.order - b.order);
 
-                        return { ...task, subtasks };
-                    })
-                );
+                    // Get subtasks for each task
+                    const tasksWithSubtasks = await Promise.all(
+                        tasks.map(async (task) => {
 
-                return { ...column, tasks: tasksWithSubtasks };
-            })
-        );
+                            const subtasks = await ctx.db
+                                .query("subtasks")
+                                .withIndex("by_task", (q) => q.eq("taskId", task._id))
+                                .collect();
 
-        // 4. Return full board structure
-        return { ...board, columns: columnsWithTasks };
+                            return { ...task, subtasks };
+                        })
+                    );
+
+                    return { ...column, tasks: tasksWithSubtasks };
+                })
+            );
+
+            // 4. Return full board structure
+            return { ...board, columns: columnsWithTasks };
+
+        } catch (error) {
+            return null
+        }
     },
 });
 

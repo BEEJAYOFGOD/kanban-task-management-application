@@ -3,7 +3,7 @@ import DashboardEmpty from "@/components/DashboardEmpty";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { preloadQuery } from "convex/nextjs";
-import NotFound from "./not-found";
+import { notFound } from "next/navigation";
 
 export default async function Dashboard({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -17,6 +17,6 @@ export default async function Dashboard({ params }: { params: Promise<{ id: stri
 
         return <Board preloadedFullBoard={preloadedFullBoard} />;
     } catch (error) {
-        return <NotFound />;
+        return notFound();
     }
 }
