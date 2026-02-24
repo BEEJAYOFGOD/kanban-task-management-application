@@ -234,7 +234,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                         <div className="space-y-2 w-full">
                             <Label htmlFor="task-status">Status</Label>
 
-                            <Select onValueChange={setStatus} defaultValue={statuses?.[0]?.name}>
+                            <Select value={status} onValueChange={setStatus} defaultValue={statuses?.[0]?.name}>
                                 <SelectTrigger className="w-full" id="task-status">
                                     <SelectValue />
                                 </SelectTrigger>
