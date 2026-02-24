@@ -29,6 +29,7 @@ export function BoardProvider({
 
     const boards = usePreloadedQuery(preloadedBoards);
     const params = useParams();
+
     const boardId = params.id as Id<"boards">;
     const isValidConvexId = (id: string) => /^[a-z0-9]{20,}$/.test(id);
 
