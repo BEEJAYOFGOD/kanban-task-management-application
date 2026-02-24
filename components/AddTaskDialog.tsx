@@ -43,7 +43,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
 
     const [title, setTitle] = useState(mode === 'edit' ? task?.title : "");
     const [description, setDescription] = useState(mode === 'edit' ? task?.description : "");
-    const [status, setStatus] = useState(mode === 'edit' ? task?.status : statuses[0].name);
+    const [status, setStatus] = useState(mode === 'edit' ? task?.status : statuses[0]?.name);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     console.log(status);
