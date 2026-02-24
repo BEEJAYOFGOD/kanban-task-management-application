@@ -8,7 +8,7 @@ import { Board, Column } from '@/types/Boards';
 
 interface BoardContextType {
     boards: Board[] | undefined | null;
-    currentBoard: Board | undefined | null;
+    currentBoard: Board;
     boardId: Id<"boards"> | undefined;
     boardName: string | undefined;
     statuses: Column[];
@@ -39,7 +39,7 @@ export function BoardProvider({
 
     const value: BoardContextType = {
         boards,
-        currentBoard,
+        currentBoard: currentBoard!,
         boardId,
         boardName: activeBoardFromList?.name,
         statuses: currentBoard?.columns ?? [],

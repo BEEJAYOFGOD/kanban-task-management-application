@@ -12,7 +12,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "./ui/textarea";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -45,6 +45,13 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     const [description, setDescription] = useState(mode === 'edit' ? task?.description : "");
     const [status, setStatus] = useState(mode === 'edit' ? task?.status : statuses[0]?.name);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (mode === 'add' && statuses?.[0]?.name && !status) {
+            setStatus(statuses[0].name);
+        }
+
+    }, [statuses]);
 
     console.log(status);
 
