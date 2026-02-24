@@ -23,7 +23,7 @@ import { Id } from "@/convex/_generated/dataModel";
 
 interface AddTaskDialogProps {
     open: boolean;
-    onOpenChange: (open: boolean) => void;
+    onOpenChange?: (open: boolean) => void;
     mode: "edit" | 'add';
     task?: Task;
 }
@@ -154,11 +154,11 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
         });
 
         return titleChanged || statusChanged || descriptionChanged || subtasksChanged;
-    }, [mode, task, description, status, subtasks]);
+    }, [mode, task, description, status, subtasks, title]);
 
     const clearForm = () => {
         setIsOpen(false);
-        onOpenChange(false);
+        onOpenChange && onOpenChange(false);
         setTitle("");
         setDescription("");
         setSubtasks(emptyStatus);
@@ -171,19 +171,21 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
         <Dialog open={isOpen || open} onOpenChange={setIsOpen || onOpenChange}>
 
             <DialogTrigger asChild className={`${mode === 'edit' && 'hidden'}`}>
-                <Button disabled={boards?.length == 0} >+ Add New Task</Button>
+                <Button disabled={boards?.length == 0 || !statuses?.length} >+ Add New Task</Button>
             </DialogTrigger>
 
             <DialogContent
                 onEscapeKeyDown={() => {
-                    { mode === 'edit' && onOpenChange(false) };
+                    { mode === 'edit' && (onOpenChange && onOpenChange(false)) };
                     clearForm();
                 }
                 }
+
                 onPointerDownOutside={() => {
-                    { mode === 'edit' && onOpenChange(false) };
+                    { mode === 'edit' && (onOpenChange && onOpenChange(false)) };
                     clearForm();
                 }}
+
                 className="sm:max-w-sm" showCloseButton={false}>
                 <form onSubmit={handleSubmit}>
                     <DialogHeader >
