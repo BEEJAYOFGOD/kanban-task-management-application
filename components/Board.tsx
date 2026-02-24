@@ -5,14 +5,20 @@ import { usePreloadedQuery, Preloaded } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "./ui/button";
 import AddNewBoardDialog from "./AddBoardDialog";
+import { useState } from "react";
 
 
 export default function Board({ preloadedFullBoard }: { preloadedFullBoard: Preloaded<typeof api.queries.boards.getFullBoard> }) {
     // If we have preloaded data, use it. Otherwise, use what's in the context.
     const currentBoard = usePreloadedQuery(preloadedFullBoard);
+    const [open, setOpen] = useState(false);
 
     if (!currentBoard) {
-        return <div>Board Not Found</div>
+        return <div className="flex flex-col justify-center items-center h-full gap-4">
+            <p> This Board Cannot Be Found create a Board Below or select one on Sidebar</p>
+            <Button onClick={() => setOpen(true)}>Create Board</Button>
+            <AddNewBoardDialog open={open} onOpenChange={setOpen} />
+        </div>
     }
 
     return (

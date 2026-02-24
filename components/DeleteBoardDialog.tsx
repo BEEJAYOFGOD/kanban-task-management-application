@@ -32,6 +32,7 @@ export default function DeleteBoardDialog({ currentBoard, taskId, open, onOpenCh
         try {
             if (currentBoard) {
                 // Navigate optimistically
+                router.push("/dashboard");
                 close();
 
                 await deleteBoard({ boardId: currentBoard._id });

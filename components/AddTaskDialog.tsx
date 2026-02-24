@@ -29,7 +29,7 @@ interface AddTaskDialogProps {
 }
 
 export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: AddTaskDialogProps) {
-    const { statuses, boardId, currentBoard, boards } = useBoardContext();
+    const { statuses, boardId, currentBoard, isLoading } = useBoardContext();
     const createTask = useMutation(api.queries.boards.createTask);
     const updateTask = useMutation(api.queries.boards.updateTask)
 
@@ -171,7 +171,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
         <Dialog open={isOpen || open} onOpenChange={setIsOpen || onOpenChange}>
 
             <DialogTrigger asChild className={`${mode === 'edit' && 'hidden'}`}>
-                <Button disabled={boards?.length == 0 || !statuses?.length} >+ Add New Task</Button>
+                <Button disabled={isLoading || !currentBoard} >+ Add New Task</Button>
             </DialogTrigger>
 
             <DialogContent

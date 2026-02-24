@@ -16,7 +16,7 @@ import DeleteBoardDialog from "./DeleteBoardDialog";
 
 
 export default function MoreOptions() {
-    const { currentBoard } = useBoardContext();
+    const { currentBoard, isLoading } = useBoardContext();
     const [edit, setEdit] = useState(false);
     const [del, setDel] = useState(false);
 
@@ -27,9 +27,9 @@ export default function MoreOptions() {
     return (
         <>
             <div className="cursor-pointer" onClick={handleMoreOptions}>
-                {currentBoard ?
+                {!isLoading ?
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger className={`${currentBoard ? 'flex' : 'hidden'}`} asChild>
                             <Image src={Option} alt="Option" className="w-1" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="mt-4">
