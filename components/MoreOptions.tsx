@@ -27,9 +27,13 @@ export default function MoreOptions() {
     return (
         <>
             <div className="cursor-pointer" onClick={handleMoreOptions}>
-                {!isLoading ?
+                {isLoading ? (
+                    <div>
+                        <div className="w-6 h-6 rounded-full border-2 border-b-primary animate-spin"></div>
+                    </div>
+                ) : currentBoard ? (
                     <DropdownMenu>
-                        <DropdownMenuTrigger className={`${currentBoard ? 'flex' : 'hidden'}`} asChild>
+                            <DropdownMenuTrigger asChild>
                             <Image src={Option} alt="Option" className="w-1" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="mt-4">
@@ -37,8 +41,7 @@ export default function MoreOptions() {
                                 <DropdownMenuItem onClick={() => setEdit(true)}>
                                     Edit Board
                                 </DropdownMenuItem>
-                            </DropdownMenuGroup>
-
+                                </DropdownMenuGroup>
                             <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={() => setDel(true)} variant="destructive">
                                     Delete Board
@@ -46,10 +49,7 @@ export default function MoreOptions() {
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    :
-                    <div>
-                        <div className="w-6 h-6 borde-white rounded-full border-2 border-b-primary animate-spin"></div>
-                    </div>}
+                ) : null}
             </div>
             <AddNewBoardDialog edit={edit} open={edit} onOpenChange={setEdit} />
             <DeleteBoardDialog currentBoard={currentBoard} open={del} onOpenChange={setDel} />

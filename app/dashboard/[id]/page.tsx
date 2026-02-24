@@ -3,22 +3,20 @@ import DashboardEmpty from "@/components/DashboardEmpty";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { preloadQuery } from "convex/nextjs";
+import NotFound from "./not-found";
 
 export default async function Dashboard({ params }: { params: Promise<{ id: string }> }) {
-
     const { id } = await params;
 
-    if (!id) {
-        return (
-            <DashboardEmpty />
-        )
+    if (!id) return <DashboardEmpty />;
+
+    try {
+        const preloadedFullBoard = await preloadQuery(api.queries.boards.getFullBoard, {
+            boardId: id as Id<"boards">
+        });
+
+        return <Board preloadedFullBoard={preloadedFullBoard} />;
+    } catch (error) {
+        return <NotFound />;
     }
-
-    const preloadedFullBoard = await preloadQuery(api.queries.boards.getFullBoard, {
-        boardId: id as Id<"boards">
-    });
-
-    return (
-        <Board preloadedFullBoard={preloadedFullBoard} />
-    )
 }

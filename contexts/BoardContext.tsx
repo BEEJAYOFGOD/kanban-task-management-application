@@ -30,10 +30,15 @@ export function BoardProvider({
     const boards = usePreloadedQuery(preloadedBoards);
     const params = useParams();
     const boardId = params.id as Id<"boards">;
+    const isValidConvexId = (id: string) => /^[a-z0-9]{20,}$/.test(id);
 
     const currentBoard = useQuery(api.queries.boards.getFullBoard,
-        boardId ? { boardId } : "skip"
+        boardId && isValidConvexId(boardId) ? { boardId } : "skip"
     );
+
+    const isValid = boardId && isValidConvexId(boardId);
+
+
 
     const activeBoardFromList = boards?.find((b) => b._id === boardId);
 
@@ -43,7 +48,7 @@ export function BoardProvider({
         boardId,
         boardName: activeBoardFromList?.name,
         statuses: currentBoard?.columns ?? [],
-        isLoading: !currentBoard && !!boardId,
+        isLoading: isValid ? currentBoard === undefined : false,
     };
 
     return (
