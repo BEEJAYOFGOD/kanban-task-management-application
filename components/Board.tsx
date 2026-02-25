@@ -32,6 +32,7 @@ export default function Board({ preloadedFullBoard }: { preloadedFullBoard: Prel
             </div>
 
             <AddNewBoardDialog
+                edit={true}
                 open={open}
                 onOpenChange={setOpen} />
 
