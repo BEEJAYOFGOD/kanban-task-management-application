@@ -28,7 +28,7 @@ export default function Board({ preloadedFullBoard }: { preloadedFullBoard: Prel
             ))}
 
             <div onClick={() => setOpen(true)} className="cursor-pointer w-60 h-[calc(100vh-4rem)] flex mt-8 justify-center items-center bg-medium-gray/4 rounded-md ">
-                <p className="text-medium-gray font-bold  hover:rounded-full hover:bg-medium-gray/10 hover:p-1 hover:text-white/80  hover:px-4">+ New Column</p>
+                <p className="text-medium-gray font-bold  hover:rounded-full hover:bg-medium-gray/10 hover:p-1 hover:text-primary/80  hover:px-4">+ New Column</p>
             </div>
 
             <AddNewBoardDialog

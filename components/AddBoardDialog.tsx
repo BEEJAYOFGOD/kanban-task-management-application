@@ -45,6 +45,7 @@ export default function AddNewBoardDialog({
         if (open) {
             if (edit && currentBoard) {
                 setBoardName(currentBoard.name || "");
+
                 setColumns(currentBoard.columns?.map(col => ({
                     _id: col._id,
                     name: col.name
@@ -55,6 +56,8 @@ export default function AddNewBoardDialog({
                 setColumns(defaultColumns);
             }
         }
+
+
     }, [open]);
 
     const removeSubtask = (index: number) => {
