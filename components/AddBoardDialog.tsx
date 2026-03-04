@@ -15,6 +15,10 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useBoardContext } from "@/contexts/BoardContext";
 import { Id } from "@/convex/_generated/dataModel";
+import { BoardFormValues, boardSchema } from "@/schemsa/Board";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { error } from "console";
 
 interface AddNewColumnDialogProps {
     edit?: boolean;
@@ -34,7 +38,26 @@ export default function AddNewBoardDialog({
 }: AddNewColumnDialogProps) {
     const { currentBoard } = useBoardContext();
     const defaultColumns: ColumnInput[] = [{ name: "Todo" }, { name: "Doing" }];
-    const [columns, setColumns] = useState<ColumnInput[]>(defaultColumns);
+
+
+
+
+    const { handleSubmit, control, register, setValue, reset, formState: { isSubmitting, isDirty, errors } } = useForm<BoardFormValues>({
+        resolver: zodResolver(boardSchema),
+        mode: 'onBlur',
+
+        defaultValues: {
+            name: edit ? currentBoard?.name : "",
+            columns: edit ? currentBoard?.columns : defaultColumns
+        },
+
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "columns"
+    });
+
     const [boardName, setBoardName] = useState("");
 
     const createBoard = useMutation(api.queries.boards.createBoard);
@@ -44,93 +67,57 @@ export default function AddNewBoardDialog({
     useEffect(() => {
         if (open) {
             if (edit && currentBoard) {
-                setBoardName(currentBoard.name || "");
+                setValue("name", currentBoard?.name);
 
-                setColumns(currentBoard.columns?.map(col => ({
-                    _id: col._id,
-                    name: col.name
-                })) || defaultColumns);
-
-            } else {
-                setBoardName("");
-                setColumns(defaultColumns);
             }
         }
 
 
     }, [open]);
 
-    const removeSubtask = (index: number) => {
-        setColumns(columns.filter((_, i) => i !== index));
-    };
 
-    const addNewSubTask = () => {
-        setColumns([...columns, { name: "" }]);
-    };
 
-    const hasChanges = useMemo(() => {
-        if (!edit || !currentBoard) return true;
 
-        // Check name change
-        const nameChanged = boardName !== currentBoard.name;
 
-        // Check columns change
-        const originalColumns = currentBoard.columns || [];
+    const onSubmit = async (data: BoardFormValues) => {
 
-        // Different number of columns
-        if (columns.length !== originalColumns.length) return true;
-
-        // Check if any column name changed
-        const columnsChanged = columns.some((col, index) => {
-            const original = originalColumns[index];
-            return col.name !== original?.name || col._id !== original?._id;
-        });
-
-        return nameChanged || columnsChanged;
-    }, [edit, currentBoard, boardName, columns]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        setColumns((prev) => {
-            const newColumns = [...prev];
-            newColumns[index].name = e.target.value;
-            return newColumns;
-        });
-    };
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        const columnsToSend = data.columns.map(({ _id, name }) => ({
+            _id: _id as Id<"columns"> | undefined,
+            name
+        }));
 
         if (edit && currentBoard) {
             await updateBoard({
                 boardId: currentBoard._id,
-                ...(boardName !== currentBoard.name && { name: boardName }),
-                columns
+                name: data.name,
+                columns: columnsToSend
             });
         } else {
             await createBoard({
-                name: boardName,
-                columns
+                name: data.name,
+                columns: data.columns
             });
         }
 
-        onOpenChange(false);
+
         clearForm();
     };
 
     const clearForm = () => {
-        setBoardName("");
-        setColumns(defaultColumns);
+        onOpenChange(false);
+        reset()
+
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                onEscapeKeyDown={clearForm}
-                onPointerDownOutside={clearForm}
+                onEscapeKeyDown={() => clearForm()}
+                onPointerDownOutside={() => clearForm()}
                 className="sm:max-w-sm"
                 showCloseButton={false}
             >
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogHeader>
                         <div className="flex justify-between items-center mb-8">
                             <DialogTitle>
@@ -141,18 +128,16 @@ export default function AddNewBoardDialog({
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="board-name">Board Name</Label>
-                            <Input
-
-                                onChange={(e) => {
-                                    setBoardName(e.target.value)
-                                }}
+                            <div>
+                                <Input
+                                    {...register("name")}
                                 type="text"
-                                id="board-name"
-                                name="board-name"
+                                    id="name"
                                 placeholder="e.g. Web Design"
                                 className="placeholder:text-medium-gray/50"
-                                value={boardName}
+                                    error={errors?.name?.message}
                             />
+                            </div>
                         </Field>
                         <Field>
                             <Label htmlFor="columns">Board Columns</Label>
@@ -167,13 +152,13 @@ export default function AddNewBoardDialog({
                                 [&::-webkit-scrollbar-track]:border-transparent
                                 [&::-webkit-scrollbar-track]:bg-clip-padding"
                             >
-                                {columns.map((column, index) => (
+                                {fields.map((field, index) => (
                                     <SubtaskInput
-                                        key={index}
-                                        index={index}
-                                        subtask={column.name}
-                                        handleInputChange={handleInputChange}
-                                        removeSubtask={removeSubtask}
+                                        error={errors.columns?.[index]?.name?.message}
+                                        key={field.id}
+                                        isOnly={fields.length === 1}
+                                        registration={register(`columns.${index}.name`)}
+                                        removeSubtask={() => remove(index)}
                                     />
                                 ))}
                             </div>
@@ -182,10 +167,10 @@ export default function AddNewBoardDialog({
 
                     <DialogFooter className="mt-4">
                         <div className="flex flex-col gap-2 w-full">
-                            <Button onClick={() => addNewSubTask()} className="w-full" variant="outline">
+                            <Button onClick={() => append({ name: "" })} className="w-full" variant="outline">
                                 + Add New Column
                             </Button>
-                            <Button disabled={edit && !hasChanges} className="w-full" type="submit">
+                            <Button disabled={edit && !isDirty} className="w-full" type="submit">
                                 {edit ? "Save Changes" : "Create New Board"}
                             </Button>
                         </div>

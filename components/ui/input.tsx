@@ -1,11 +1,19 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
+import { FieldError } from "react-hook-form";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+
+interface InputProps extends React.ComponentProps<"input"> {
+  error?: string;
+}
+
+function Input({ className, type, error, ...props }: InputProps) {
+
+
 
 
   return (
+    <div className={`relative  h-full`}>
     <input
       type={type}
       data-slot="input"
@@ -14,10 +22,16 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "focus-visible:border-primary focus-visible:ring-primary focus-visible:ring-[0.5px]",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className,
+        error && "border-destructive"
 
       )}
       {...props}
+
+
+
     />
+      {error && <p className="text-destructive text-xs absolute top-2.5 right-4">{error}</p>}
+    </div>
   )
 }
 
