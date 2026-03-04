@@ -28,7 +28,8 @@ export default async function DashboardLayout({
                 <div className="w-full min-h-screen">
                     <Header />
 
-                    <div className="flex h-[calc(100vh-4rem)]">
+                    <div className="flex  h-[calc(100vh-4rem)]">
+
                         <AppSidebar />
 
                         <main className="w-full p-4 duration-300 ease-in-out transition-all  overflow-auto bg-dashboard-bg">

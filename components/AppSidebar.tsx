@@ -51,13 +51,13 @@ export default function AppSidebar() {
     return (
         <>
             <Sidebar
-                className={`bg-sidebar static h-full  duration-300 ease-in-out transition-all overflow-hidden ${state === "expanded" ? "w-60  border-r border-sidebar-border/20 transition-all duration-200" : "w-0 p-0 transition-all  border-r-0"
+                className={`bg-sidebar static h-full pt-6  duration-300 ease-in-out transition-all overflow-hidden ${state === "expanded" ? "w-60  border-r border-sidebar-border/20 transition-all duration-200" : "w-0 p-0 transition-all  border-r-0"
                     }`}
             >
                 <SidebarContent className="p-0 ">
                     {/* Main Navigation */}
                     <SidebarGroup className="p-0 m-0 pr-3">
-                        <SidebarGroupLabel className="text-medium-gray pl-6">ALL BOARDS</SidebarGroupLabel>
+                        <SidebarGroupLabel className="text-medium-gray pl-6 tracking-widest">ALL BOARDS ({Links.length})</SidebarGroupLabel>
                         <SidebarGroupContent >
                             <SidebarMenu>
                                 {Links.map((link) =>

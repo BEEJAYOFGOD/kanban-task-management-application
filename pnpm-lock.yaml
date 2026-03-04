@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@tailwindcss/oxide-win32-x64-msvc':
+        specifier: ^4.2.1
+        version: 4.2.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -35,6 +38,9 @@ importers:
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -1571,6 +1577,12 @@ packages:
   '@tailwindcss/oxide-win32-x64-msvc@4.1.18':
     resolution: {integrity: sha512-bJWbyYpUlqamC8dpR7pfjA0I7vdF6t5VpUGMWRkXVE3AXgIZjYUYAK7II1GNaxR8J1SSrSrppRar8G++JekE3Q==}
     engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.1':
+    resolution: {integrity: sha512-rbO34G5sMWWyrN/idLeVxAZgAKWrn5LiR3/I90Q9MkA67s6T1oB0xtTe+0heoBvHSpbU9Mk7i6uwJnpo4u21XQ==}
+    engines: {node: '>= 20'}
     cpu: [x64]
     os: [win32]
 
@@ -6016,6 +6028,8 @@ snapshots:
 
   '@tailwindcss/oxide-win32-x64-msvc@4.1.18':
     optional: true
+
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.1': {}
 
   '@tailwindcss/oxide@4.1.18':
     optionalDependencies:

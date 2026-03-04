@@ -20,7 +20,6 @@ import { useBoardContext } from "@/contexts/BoardContext";
 import { Column, Task } from "@/types/Boards";
 import SubtaskInput from "./SubtaskInput";
 import { Id } from "@/convex/_generated/dataModel";
-import * as z from "zod";
 
 interface AddTaskDialogProps {
     open: boolean;
@@ -46,17 +45,6 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     const [description, setDescription] = useState(mode === 'edit' ? task?.description : "");
     const [status, setStatus] = useState(mode === 'edit' ? task?.status : statuses[0]?.name);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // testing zod
-    const Player = z.object({
-        username: z.string(),
-        xp: z.number()
-    })
-
-
-    console.log(Player.parse({ username: "billie", xp: 100 }));
-    console.log("parsing player data");
-    // testing zod
 
     useEffect(() => {
         if (mode === 'add' && statuses?.[0]?.name && !status) {

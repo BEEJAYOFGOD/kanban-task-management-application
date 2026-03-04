@@ -142,7 +142,7 @@ export default function AddNewBoardDialog({
                         <Field>
                             <Label htmlFor="board-name">Board Name</Label>
                             <Input
-                                required
+
                                 onChange={(e) => {
                                     setBoardName(e.target.value)
                                 }}
