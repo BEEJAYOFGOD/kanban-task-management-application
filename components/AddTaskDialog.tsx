@@ -157,7 +157,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
 
                             <Textarea
                                 maxLength={200}
-                                error={errors?.title?.message}
+                                error={errors?.description?.message}
                                 id="description"
                                 {...register("description")}
                                 placeholder="e.g. It's always good to take a break."
