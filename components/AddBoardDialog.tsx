@@ -9,7 +9,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect, useMemo } from "react"; // Add useEffect
+import { useEffect, } from "react";
 import SubtaskInput from "./SubtaskInput";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -39,9 +39,6 @@ export default function AddNewBoardDialog({
     const { currentBoard } = useBoardContext();
     const defaultColumns: ColumnInput[] = [{ name: "Todo" }, { name: "Doing" }];
 
-
-
-
     const { handleSubmit, control, register, setValue, reset, formState: { isSubmitting, isDirty, errors } } = useForm<BoardFormValues>({
         resolver: zodResolver(boardSchema),
         mode: 'onBlur',
@@ -58,22 +55,20 @@ export default function AddNewBoardDialog({
         name: "columns"
     });
 
-    const [boardName, setBoardName] = useState("");
-
     const createBoard = useMutation(api.queries.boards.createBoard);
     const updateBoard = useMutation(api.queries.boards.updateBoard);
 
     // Only sync when dialog opens/closes
-    useEffect(() => {
-        if (open) {
-            if (edit && currentBoard) {
-                setValue("name", currentBoard?.name);
+    // useEffect(() => {
+    //     if (open) {
+    //         if (edit && currentBoard) {
+    //             setValue("name", currentBoard?.name);
 
-            }
-        }
+    //         }
+    //     }
 
 
-    }, [open]);
+    // }, [open]);
 
 
 
@@ -82,7 +77,7 @@ export default function AddNewBoardDialog({
     const onSubmit = async (data: BoardFormValues) => {
 
         const columnsToSend = data.columns.map(({ _id, name }) => ({
-            _id: _id as Id<"columns"> | undefined,
+            _id: _id as Id<"columns"> || undefined,
             name
         }));
 
@@ -128,15 +123,16 @@ export default function AddNewBoardDialog({
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="board-name">Board Name</Label>
+
                             <div>
                                 <Input
                                     {...register("name")}
-                                type="text"
+                                    type="text"
                                     id="name"
-                                placeholder="e.g. Web Design"
-                                className="placeholder:text-medium-gray/50"
+                                    placeholder="e.g. Web Design"
+                                    className="placeholder:text-medium-gray/50"
                                     error={errors?.name?.message}
-                            />
+                                />
                             </div>
                         </Field>
                         <Field>
@@ -170,7 +166,7 @@ export default function AddNewBoardDialog({
                             <Button onClick={() => append({ name: "" })} className="w-full" variant="outline">
                                 + Add New Column
                             </Button>
-                            <Button disabled={edit && !isDirty} className="w-full" type="submit">
+                            <Button disabled={isSubmitting && !isDirty} className="w-full" type="submit">
                                 {edit ? "Save Changes" : "Create New Board"}
                             </Button>
                         </div>
