@@ -9,7 +9,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, } from "react";
+import { useEffect, useState, } from "react";
 import SubtaskInput from "./SubtaskInput";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -39,9 +39,16 @@ export default function AddNewBoardDialog({
     const { currentBoard } = useBoardContext();
     const defaultColumns: ColumnInput[] = [{ name: "Todo" }, { name: "Doing" }];
 
+    const [shake, setShake] = useState(false);
+
+
+    const onError = () => {
+        setShake(s => !s); // toggles true → false → true each submit
+    };
+
     const { handleSubmit, control, register, setValue, reset, formState: { isSubmitting, isDirty, errors } } = useForm<BoardFormValues>({
         resolver: zodResolver(boardSchema),
-        mode: 'onBlur',
+        mode: 'onTouched',
 
         defaultValues: {
             name: edit ? currentBoard?.name : "",
@@ -59,22 +66,27 @@ export default function AddNewBoardDialog({
     const updateBoard = useMutation(api.queries.boards.updateBoard);
 
     // Only sync when dialog opens/closes
-    // useEffect(() => {
-    //     if (open) {
-    //         if (edit && currentBoard) {
-    //             setValue("name", currentBoard?.name);
+    useEffect(() => {
+        if (open) {
+            if (edit && currentBoard) {
+                setValue("name", currentBoard?.name);
 
-    //         }
-    //     }
+            }
+        }
 
 
-    // }, [open]);
+    }, [open]);
 
 
 
 
 
     const onSubmit = async (data: BoardFormValues) => {
+
+        if (!isDirty) {
+            clearForm(); // just close silently
+            return;
+        }
 
         const columnsToSend = data.columns.map(({ _id, name }) => ({
             _id: _id as Id<"columns"> || undefined,
@@ -107,12 +119,13 @@ export default function AddNewBoardDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
                 onEscapeKeyDown={() => clearForm()}
                 onPointerDownOutside={() => clearForm()}
                 className="sm:max-w-sm"
                 showCloseButton={false}
             >
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <DialogHeader>
                         <div className="flex justify-between items-center mb-8">
                             <DialogTitle>
@@ -127,6 +140,7 @@ export default function AddNewBoardDialog({
                             <div>
                                 <Input
                                     {...register("name")}
+                                    key={`name-${shake}`}
                                     type="text"
                                     id="name"
                                     placeholder="e.g. Web Design"
@@ -151,7 +165,7 @@ export default function AddNewBoardDialog({
                                 {fields.map((field, index) => (
                                     <SubtaskInput
                                         error={errors.columns?.[index]?.name?.message}
-                                        key={field.id}
+                                        key={errors.columns?.[index]?.name ? `col-${index}-error-${shake}` : `col-${index}`}
                                         isOnly={fields.length === 1}
                                         registration={register(`columns.${index}.name`)}
                                         removeSubtask={() => remove(index)}
@@ -166,7 +180,7 @@ export default function AddNewBoardDialog({
                             <Button onClick={() => append({ name: "" })} className="w-full" variant="outline">
                                 + Add New Column
                             </Button>
-                            <Button disabled={isSubmitting && !isDirty} className="w-full" type="submit">
+                            <Button disabled={isSubmitting} className="w-full" type="submit">
                                 {edit ? "Save Changes" : "Create New Board"}
                             </Button>
                         </div>

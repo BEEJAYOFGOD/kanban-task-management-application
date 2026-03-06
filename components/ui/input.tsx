@@ -22,7 +22,7 @@ function Input({ className, type, error, ...props }: InputProps) {
         "focus-visible:border-primary focus-visible:ring-primary focus-visible:ring-[0.5px]",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className,
-        error && "border-destructive"
+        error && "border-destructive focus-visible:border-destructive input-error focus-visible:ring-destructive focus-visible:ring-[0.5px]"
 
       )}
       {...props}

@@ -22,7 +22,6 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskFormValues } from "@/schemsa/task";
-import { useRef } from "react";
 
 
 interface AddTaskDialogProps {
@@ -37,6 +36,13 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     const createTask = useMutation(api.queries.boards.createTask);
     const updateTask = useMutation(api.queries.boards.updateTask);
     const [isOpen, setIsOpen] = useState(false);
+
+    const [shake, setShake] = useState(false);
+
+
+    const onError = () => {
+        setShake(s => !s); // toggles true → false → true each submit
+    };
 
 
 
@@ -67,6 +73,12 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     });
 
     const onSubmit = async (data: TaskFormValues) => {
+
+        if (!isDirty) {
+            clearForm(); // just close silently
+            return;
+        }
+
         if (!boardId || !currentBoard) return;
 
         try {
@@ -105,15 +117,16 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     };
 
     const clearForm = () => {
+        reset();           // ✅ clear errors first
+        setShake(false);   // then reset shake
         setIsOpen(false);
-        onOpenChange && onOpenChange(false);
-        reset();
+        onOpenChange?.(false);
     }
 
-    const { ref, ...rest } = register("title");
+
 
     return (
-        <Dialog open={isOpen || open} onOpenChange={setIsOpen || onOpenChange}>
+        <Dialog onOpenChange={(open) => { setIsOpen(open); onOpenChange?.(open); }}>
             <DialogTrigger asChild className={`${mode === 'edit' && 'hidden'}`}>
                 <Button disabled={isLoading || !currentBoard}>+ Add New Task</Button>
             </DialogTrigger>
@@ -131,7 +144,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                 className="sm:max-w-sm"
                 showCloseButton={false}
             >
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <DialogHeader>
                         <div className="flex justify-between items-center mb-6">
                             <DialogTitle>
@@ -145,9 +158,11 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                             <Label htmlFor="title">Title</Label>
                             <Input
                                 error={errors?.title?.message}
+                                //  error={shake ? errors?.title?.message : undefined}
                                 type="text"
                                 {...register("title")}
                                 id="title"
+                                key={`title-${shake}`}
                                 placeholder="e.g. Take coffee break"
                             />
                         </Field>
@@ -159,6 +174,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                                 maxLength={200}
                                 error={errors?.description?.message}
                                 id="description"
+                                key={`description-${shake}`}
                                 {...register("description")}
                                 placeholder="e.g. It's always good to take a break."
                             />
@@ -180,7 +196,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                                 {fields.map((field, index) => (
                                     <SubtaskInput
                                         isOnly={fields.length === 1}
-                                        key={field.id}
+                                        key={`subtask-${index}-${shake}`}
                                         removeSubtask={() => {
                                             console.log("ademola");
                                             remove(index);
@@ -228,7 +244,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                         </div>
 
                         <Button
-                            disabled={isSubmitting || !isDirty}
+                            disabled={isSubmitting}
                             className="w-full"
                             type="submit"
                         >
