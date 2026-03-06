@@ -49,7 +49,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
 
     const { register, handleSubmit, control, reset, setValue, formState: { errors, isSubmitting, isDirty } } = useForm<TaskFormValues>({
         resolver: zodResolver(taskSchema),
-        mode: "onBlur",
+        mode: "onTouched",
 
         defaultValues: {
             title: mode === 'edit' ? task?.title : "",
@@ -74,8 +74,10 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
 
     const onSubmit = async (data: TaskFormValues) => {
 
+
+        // this will only apply for edit mode
         if (!isDirty) {
-            clearForm(); // just close silently
+            clearForm();
             return;
         }
 
@@ -117,8 +119,8 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
     };
 
     const clearForm = () => {
-        reset();           // ✅ clear errors first
-        setShake(false);   // then reset shake
+        reset();
+        setShake(!shake);
         setIsOpen(false);
         onOpenChange?.(false);
     }
@@ -196,7 +198,7 @@ export default function AddNewTaskDialog({ open, onOpenChange, mode, task }: Add
                                 {fields.map((field, index) => (
                                     <SubtaskInput
                                         isOnly={fields.length === 1}
-                                        key={`subtask-${index}-${shake}`}
+                                        key={errors.subtasks?.[index]?.title?.message ? `subtask-${index}-error-${shake}` : `subtask-${index}`}
                                         removeSubtask={() => {
                                             console.log("ademola");
                                             remove(index);

@@ -111,10 +111,10 @@ export default function AddNewBoardDialog({
     };
 
     const clearForm = () => {
-        onOpenChange(false);
-        reset()
-
-    };
+        reset();
+        setShake(!shake);
+        onOpenChange?.(false);
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
